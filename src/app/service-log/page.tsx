@@ -4,6 +4,7 @@ import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
 import { AddServiceForm } from "./AddServiceForm";
 import { CurrencyToggle } from "./CurrencyToggle";
+import { GuessDateButton } from "./GuessDateButton";
 
 export const dynamic = "force-dynamic";
 
@@ -77,16 +78,25 @@ export default async function ServiceLogPage() {
                             {/* Header */}
                             <div className="px-4 pt-4 pb-3 flex items-start justify-between">
                                 <div>
-                                    <p className="text-lg font-mono text-white tabular-nums">
-                                        {formatted}
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-lg font-mono text-white tabular-nums">
+                                            {formatted}
+                                        </p>
+                                        {!record.serviceDate &&
+                                            record.mileage && (
+                                                <GuessDateButton
+                                                    recordId={record.id}
+                                                />
+                                            )}
+                                    </div>
                                     <div className="flex items-center gap-3 mt-0.5">
-                                        {record.mileage && (
-                                            <span className="text-[10px] font-mono tracking-wider text-neutral-500">
-                                                {record.mileage.toLocaleString()}{" "}
-                                                MI
-                                            </span>
-                                        )}
+                                        {record.mileage &&
+                                            record.serviceDate && (
+                                                <span className="text-[10px] font-mono tracking-wider text-neutral-500">
+                                                    {record.mileage.toLocaleString()}{" "}
+                                                    MI
+                                                </span>
+                                            )}
                                         {record.shop && (
                                             <span className="text-[10px] font-mono tracking-wider text-neutral-500">
                                                 {record.shop}

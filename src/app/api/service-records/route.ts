@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { estimateDateFromMileage } from "@/lib/estimate-date";
 
 export async function GET() {
     const vehicle = await prisma.shelbyVehicle.findFirst();
@@ -77,10 +78,18 @@ export async function POST(request: Request) {
             },
         });
 
+        // Auto-derive date from mileage if no date provided
+        let serviceDate: Date | null = date ? new Date(date) : null;
+        if (!serviceDate && mileage) {
+            serviceDate =
+                (await estimateDateFromMileage(vehicle.id, Number(mileage))) ??
+                null;
+        }
+
         const record = await prisma.shelbyServiceRecord.create({
             data: {
                 vehicleId: vehicle.id,
-                serviceDate: date ? new Date(date) : null,
+                serviceDate,
                 mileage: mileage ? Number(mileage) : null,
                 shop: shop || null,
                 currency: currency || "USD",
