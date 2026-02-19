@@ -120,24 +120,21 @@ model ShelbyServiceRecord {
   mileage     Int?
   shop        String?
   notes       String?
-  lineItems     ShelbyServiceLineItem[]
-  serviceNotes  ShelbyNote[]
-  resolvedNotes ShelbyNote[]            @relation("resolvedNotes")
-  createdAt     DateTime                @default(now())
+  lineItems    ShelbyServiceLineItem[]
+  serviceNotes ShelbyNote[]
+  createdAt    DateTime                @default(now())
 
   @@map("shelby_service_record")
 }
 
 model ShelbyNote {
-  id                 String               @id @default(cuid())
-  serviceRecordId    String
-  serviceRecord      ShelbyServiceRecord  @relation(fields: [serviceRecordId], references: [id])
-  type               NoteType
-  title              String
-  content            String
-  resolvedByRecordId String?
-  resolvedByRecord   ShelbyServiceRecord? @relation("resolvedNotes", fields: [resolvedByRecordId], references: [id])
-  createdAt          DateTime             @default(now())
+  id              String              @id @default(cuid())
+  serviceRecordId String
+  serviceRecord   ShelbyServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  type            NoteType
+  title           String
+  content         String
+  createdAt       DateTime            @default(now())
 
   @@map("shelby_note")
 }

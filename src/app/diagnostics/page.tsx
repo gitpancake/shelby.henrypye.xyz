@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
-import { AttentionSection } from "./AttentionSection";
 import { ComponentHealthSection } from "./ComponentHealthSection";
 
 export const dynamic = "force-dynamic";
@@ -46,14 +45,6 @@ export default async function DiagnosticsPage() {
                 serviceRecord: {
                     select: { serviceDate: true, mileage: true, shop: true },
                 },
-                resolvedByRecord: {
-                    select: {
-                        id: true,
-                        serviceDate: true,
-                        mileage: true,
-                        shop: true,
-                    },
-                },
             },
             orderBy: { createdAt: "desc" },
         }),
@@ -71,35 +62,8 @@ export default async function DiagnosticsPage() {
     const latestDate = records.length > 0 ? records[0].serviceDate : null;
 
     // Concerns, recommendations, measurements
-    const attentionNotes = notes
-        .filter((n) => n.type === "CONCERN" || n.type === "RECOMMENDATION")
-        .map((n) => ({
-            id: n.id,
-            type: n.type,
-            title: n.title,
-            content: n.content,
-            serviceRecord: {
-                serviceDate: n.serviceRecord.serviceDate.toISOString(),
-                mileage: n.serviceRecord.mileage,
-                shop: n.serviceRecord.shop,
-            },
-            resolvedByRecord: n.resolvedByRecord
-                ? {
-                      id: n.resolvedByRecord.id,
-                      serviceDate: n.resolvedByRecord.serviceDate.toISOString(),
-                      mileage: n.resolvedByRecord.mileage,
-                      shop: n.resolvedByRecord.shop,
-                  }
-                : null,
-        }));
-
-    const serviceRecordOptions = records.map((r) => ({
-        id: r.id,
-        serviceDate: r.serviceDate.toISOString(),
-        mileage: r.mileage,
-        shop: r.shop,
-    }));
-
+    const concerns = notes.filter((n) => n.type === "CONCERN");
+    const recommendations = notes.filter((n) => n.type === "RECOMMENDATION");
     const measurements = notes.filter((n) => n.type === "MEASUREMENT");
 
     // Component health data
@@ -127,7 +91,6 @@ export default async function DiagnosticsPage() {
         }));
 
         return {
-            id: c.id,
             name: c.name,
             category: c.category ?? "Other",
             timesServiced: c.lineItems.length,
@@ -214,14 +177,80 @@ export default async function DiagnosticsPage() {
             </div>
 
             {/* Attention Required */}
-            {attentionNotes.length > 0 && (
+            {(concerns.length > 0 || recommendations.length > 0) && (
                 <div className="mt-10">
                     <GradientDivider label="Attention Required" />
-                    <div className="mt-6">
-                        <AttentionSection
-                            notes={attentionNotes}
-                            serviceRecords={serviceRecordOptions}
-                        />
+                    <div className="mt-6 space-y-3">
+                        {concerns.map((note) => (
+                            <div
+                                key={note.id}
+                                className="rounded-xl border border-red-900/30 bg-red-500/[0.03] px-4 py-3"
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-red-400/80">
+                                        Concern
+                                    </span>
+                                    <span className="text-[10px] font-mono text-neutral-500">
+                                        {formatDate(
+                                            note.serviceRecord.serviceDate,
+                                        )}
+                                        {note.serviceRecord.mileage && (
+                                            <>
+                                                {" "}
+                                                &middot;{" "}
+                                                {note.serviceRecord.mileage.toLocaleString()}{" "}
+                                                mi
+                                            </>
+                                        )}
+                                        {note.serviceRecord.shop && (
+                                            <>
+                                                {" "}
+                                                &middot;{" "}
+                                                {note.serviceRecord.shop}
+                                            </>
+                                        )}
+                                    </span>
+                                </div>
+                                <p className="text-xs font-mono text-neutral-300">
+                                    {note.title}
+                                </p>
+                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
+                                    {note.content}
+                                </p>
+                            </div>
+                        ))}
+
+                        {recommendations.map((note) => (
+                            <div
+                                key={note.id}
+                                className="rounded-xl border border-amber-900/30 bg-amber-500/[0.03] px-4 py-3"
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-amber-400/80">
+                                        Recommendation
+                                    </span>
+                                    <span className="text-[10px] font-mono text-neutral-500">
+                                        {formatDate(
+                                            note.serviceRecord.serviceDate,
+                                        )}
+                                        {note.serviceRecord.mileage && (
+                                            <>
+                                                {" "}
+                                                &middot;{" "}
+                                                {note.serviceRecord.mileage.toLocaleString()}{" "}
+                                                mi
+                                            </>
+                                        )}
+                                    </span>
+                                </div>
+                                <p className="text-xs font-mono text-neutral-300">
+                                    {note.title}
+                                </p>
+                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
+                                    {note.content}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
@@ -230,10 +259,7 @@ export default async function DiagnosticsPage() {
             <div className="mt-10">
                 <GradientDivider label="Component Health" />
                 <div className="mt-6">
-                    <ComponentHealthSection
-                        components={componentHealth}
-                        serviceRecords={serviceRecordOptions}
-                    />
+                    <ComponentHealthSection components={componentHealth} />
                 </div>
             </div>
 
