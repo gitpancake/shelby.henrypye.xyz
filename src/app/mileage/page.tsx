@@ -36,6 +36,7 @@ export default async function MileagePage() {
     }
 
     for (const r of serviceRecords) {
+        if (!r.serviceDate) continue;
         entries.push({
             date: r.serviceDate.toISOString(),
             mileage: r.mileage!,

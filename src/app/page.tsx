@@ -167,12 +167,14 @@ export default async function HomePage() {
                     {latestRecord ? (
                         <>
                             <p className="text-xs font-mono text-white">
-                                {new Date(
-                                    latestRecord.serviceDate,
-                                ).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    year: "numeric",
-                                })}
+                                {latestRecord.serviceDate
+                                    ? new Date(
+                                          latestRecord.serviceDate,
+                                      ).toLocaleDateString("en-US", {
+                                          month: "short",
+                                          year: "numeric",
+                                      })
+                                    : "Unknown date"}
                             </p>
                             {latestRecord.mileage && (
                                 <p className="text-[10px] font-mono text-neutral-600 mt-0.5">

@@ -46,10 +46,15 @@ export async function POST(request: Request) {
             notes,
         } = body;
 
-        if (!date || !description || !componentName || !category) {
+        if (
+            (!date && !mileage) ||
+            !description ||
+            !componentName ||
+            !category
+        ) {
             return NextResponse.json(
                 {
-                    error: "Date, description, component, and category are required",
+                    error: "Date or mileage (plus description, component, category) required",
                 },
                 { status: 400 },
             );
@@ -75,7 +80,7 @@ export async function POST(request: Request) {
         const record = await prisma.shelbyServiceRecord.create({
             data: {
                 vehicleId: vehicle.id,
-                serviceDate: new Date(date),
+                serviceDate: date ? new Date(date) : null,
                 mileage: mileage ? Number(mileage) : null,
                 shop: shop || null,
                 currency: currency || "USD",

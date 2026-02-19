@@ -52,12 +52,18 @@ export default async function ServiceLogPage() {
                 )}
 
                 {records.map((record) => {
-                    const date = new Date(record.serviceDate);
-                    const formatted = date.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                    });
+                    const formatted = record.serviceDate
+                        ? new Date(record.serviceDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                              },
+                          )
+                        : record.mileage
+                          ? `@ ${record.mileage.toLocaleString()} mi`
+                          : "Unknown";
                     const totalCost = record.lineItems.reduce(
                         (sum, li) => sum + (li.cost ?? 0),
                         0,

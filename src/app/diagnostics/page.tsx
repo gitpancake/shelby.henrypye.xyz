@@ -55,9 +55,13 @@ export default async function DiagnosticsPage() {
                 (spentByCurrency[r.currency] ?? 0) + cost;
         }
     }
+    const datedRecords = records.filter((r) => r.serviceDate != null);
     const earliestDate =
-        records.length > 0 ? records[records.length - 1].serviceDate : null;
-    const latestDate = records.length > 0 ? records[0].serviceDate : null;
+        datedRecords.length > 0
+            ? datedRecords[datedRecords.length - 1].serviceDate
+            : null;
+    const latestDate =
+        datedRecords.length > 0 ? datedRecords[0].serviceDate : null;
 
     // Component health data
     const now = new Date();
@@ -76,7 +80,9 @@ export default async function DiagnosticsPage() {
         const totalCost = c.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0);
 
         const serviceHistory = c.lineItems.map((li) => ({
-            date: new Date(li.serviceRecord.serviceDate).toISOString(),
+            date: li.serviceRecord.serviceDate
+                ? new Date(li.serviceRecord.serviceDate).toISOString()
+                : null,
             mileage: li.serviceRecord.mileage,
             shop: li.serviceRecord.shop,
             description: li.description,

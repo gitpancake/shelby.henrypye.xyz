@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 interface ServiceHistoryEntry {
-    date: string;
+    date: string | null;
     mileage: number | null;
     shop: string | null;
     description: string;
@@ -113,7 +113,9 @@ function ComponentCard({ component }: { component: ComponentData }) {
                         >
                             <div>
                                 <span className="text-[10px] font-mono text-neutral-400">
-                                    {formatDate(entry.date)}
+                                    {entry.date
+                                        ? formatDate(entry.date)
+                                        : "Unknown date"}
                                 </span>
                                 {entry.shop && (
                                     <span className="text-[10px] font-mono text-neutral-600 ml-2">

@@ -55,6 +55,12 @@ export function AddServiceForm() {
         setSaving(true);
         setError(null);
 
+        if (!date && !mileage) {
+            setError("Provide at least a date or mileage");
+            setSaving(false);
+            return;
+        }
+
         try {
             const res = await fetch("/api/service-records", {
                 method: "POST",
@@ -108,11 +114,10 @@ export function AddServiceForm() {
             <div className="grid grid-cols-2 gap-3">
                 <div>
                     <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
-                        Date *
+                        Date
                     </label>
                     <input
                         type="date"
-                        required
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                         className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white [color-scheme:dark]"

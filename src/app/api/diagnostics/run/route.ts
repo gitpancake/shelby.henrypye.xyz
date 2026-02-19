@@ -78,10 +78,13 @@ export async function POST() {
 
         lines.push("=== SERVICE HISTORY ===");
         for (const record of records) {
-            const date = new Date(record.serviceDate).toLocaleDateString(
-                "en-US",
-                { month: "short", day: "numeric", year: "numeric" },
-            );
+            const date = record.serviceDate
+                ? new Date(record.serviceDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                  })
+                : "Unknown date";
             lines.push(
                 `--- ${date}${record.mileage ? ` @ ${record.mileage.toLocaleString()} mi` : ""}${record.shop ? ` — ${record.shop}` : ""} ---`,
             );
@@ -104,7 +107,7 @@ export async function POST() {
         for (const comp of components) {
             const serviceCount = comp.lineItems.length;
             const latest = comp.lineItems[comp.lineItems.length - 1];
-            const lastDate = latest
+            const lastDate = latest?.serviceRecord.serviceDate
                 ? new Date(latest.serviceRecord.serviceDate).toLocaleDateString(
                       "en-US",
                       {
@@ -113,20 +116,23 @@ export async function POST() {
                           year: "numeric",
                       },
                   )
-                : "never";
+                : "unknown";
             const lastMileage = latest?.serviceRecord.mileage;
 
             lines.push(
                 `${comp.name} (${comp.category ?? "Other"}): serviced ${serviceCount}x, last ${lastDate}${lastMileage ? ` @ ${lastMileage.toLocaleString()} mi` : ""}`,
             );
             for (const li of comp.lineItems) {
-                const date = new Date(
-                    li.serviceRecord.serviceDate,
-                ).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                });
+                const date = li.serviceRecord.serviceDate
+                    ? new Date(li.serviceRecord.serviceDate).toLocaleDateString(
+                          "en-US",
+                          {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                          },
+                      )
+                    : "unknown date";
                 lines.push(
                     `    ${date}${li.serviceRecord.mileage ? ` @ ${li.serviceRecord.mileage.toLocaleString()} mi` : ""}: ${li.description}`,
                 );

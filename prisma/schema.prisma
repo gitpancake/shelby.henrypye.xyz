@@ -117,7 +117,7 @@ model ShelbyServiceRecord {
   vehicle     ShelbyVehicle           @relation(fields: [vehicleId], references: [id])
   documentId  String?
   document    ShelbyDocument?         @relation(fields: [documentId], references: [id])
-  serviceDate DateTime                @db.Date
+  serviceDate DateTime?               @db.Date
   mileage     Int?
   shop        String?
   currency    String                  @default("USD")
