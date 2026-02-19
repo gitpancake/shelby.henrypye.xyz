@@ -35,7 +35,7 @@ export async function GET() {
         entries.push({
             date: r.serviceDate.toISOString(),
             mileage: r.mileage!,
-            source: r.document.originalFilename,
+            source: r.document?.originalFilename ?? "Manual entry",
         });
     }
 
@@ -48,7 +48,9 @@ export async function GET() {
         return true;
     });
 
-    unique.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    unique.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
 
     return NextResponse.json(unique);
 }

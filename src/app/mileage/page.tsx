@@ -39,7 +39,7 @@ export default async function MileagePage() {
         entries.push({
             date: r.serviceDate.toISOString(),
             mileage: r.mileage!,
-            source: r.document.originalFilename,
+            source: r.document?.originalFilename ?? "Manual entry",
         });
     }
 

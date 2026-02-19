@@ -115,8 +115,8 @@ model ShelbyServiceRecord {
   id          String                  @id @default(cuid())
   vehicleId   String
   vehicle     ShelbyVehicle           @relation(fields: [vehicleId], references: [id])
-  documentId  String
-  document    ShelbyDocument          @relation(fields: [documentId], references: [id])
+  documentId  String?
+  document    ShelbyDocument?         @relation(fields: [documentId], references: [id])
   serviceDate DateTime                @db.Date
   mileage     Int?
   shop        String?

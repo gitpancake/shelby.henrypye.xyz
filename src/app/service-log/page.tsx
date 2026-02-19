@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
+import { AddServiceForm } from "./AddServiceForm";
 
 export const dynamic = "force-dynamic";
 
@@ -37,10 +38,15 @@ export default async function ServiceLogPage() {
         <PageShell>
             <GradientDivider label="Service Log" />
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-8">
+                <AddServiceForm />
+            </div>
+
+            <div className="mt-4 space-y-4">
                 {records.length === 0 && (
                     <p className="text-center text-xs font-mono text-neutral-600">
-                        No service records yet. Upload documents to get started.
+                        No service records yet. Upload documents or log a
+                        service manually.
                     </p>
                 )}
 
@@ -148,7 +154,9 @@ export default async function ServiceLogPage() {
                             {/* Footer */}
                             <div className="px-4 py-2 border-t border-neutral-800/40 bg-white/[0.01]">
                                 <span className="text-[9px] font-mono text-neutral-700 tracking-wider">
-                                    Source: {record.document.originalFilename}
+                                    {record.document
+                                        ? `Source: ${record.document.originalFilename}`
+                                        : "Manual entry"}
                                 </span>
                             </div>
                         </div>
