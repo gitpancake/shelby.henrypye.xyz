@@ -47,10 +47,14 @@ export default async function DiagnosticsPage() {
     // Summary stats
     const totalRecords = records.length;
     const totalComponents = components.length;
-    const totalSpent = records.reduce(
-        (sum, r) => sum + r.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0),
-        0,
-    );
+    const spentByCurrency: Record<string, number> = {};
+    for (const r of records) {
+        const cost = r.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0);
+        if (cost > 0) {
+            spentByCurrency[r.currency] =
+                (spentByCurrency[r.currency] ?? 0) + cost;
+        }
+    }
     const earliestDate =
         records.length > 0 ? records[records.length - 1].serviceDate : null;
     const latestDate = records.length > 0 ? records[0].serviceDate : null;
@@ -115,15 +119,10 @@ export default async function DiagnosticsPage() {
             <GradientDivider label="Diagnostics" />
 
             {/* Summary Stats */}
-            <div className="mt-8 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40">
+            <div className="mt-8 grid grid-cols-2 gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40">
                 {[
                     { label: "Records", value: totalRecords.toString() },
                     { label: "Components", value: totalComponents.toString() },
-                    {
-                        label: "Total Spent",
-                        value:
-                            totalSpent > 0 ? `$${totalSpent.toFixed(0)}` : "$0",
-                    },
                 ].map((stat) => (
                     <div
                         key={stat.label}
@@ -137,6 +136,36 @@ export default async function DiagnosticsPage() {
                         </p>
                     </div>
                 ))}
+            </div>
+
+            <div
+                className={`mt-2 grid gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40 ${Object.keys(spentByCurrency).length === 2 ? "grid-cols-2" : "grid-cols-1"}`}
+            >
+                {Object.keys(spentByCurrency).length > 0 ? (
+                    Object.entries(spentByCurrency).map(([cur, amount]) => (
+                        <div
+                            key={cur}
+                            className="bg-[#060606] px-4 py-4 text-center"
+                        >
+                            <p className="text-lg font-mono text-white tabular-nums">
+                                {cur === "CAD" ? "CA$" : "$"}
+                                {amount.toFixed(0)}
+                            </p>
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
+                                Spent ({cur})
+                            </p>
+                        </div>
+                    ))
+                ) : (
+                    <div className="bg-[#060606] px-4 py-4 text-center">
+                        <p className="text-lg font-mono text-white tabular-nums">
+                            $0
+                        </p>
+                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
+                            Total Spent
+                        </p>
+                    </div>
+                )}
             </div>
 
             <div className="mt-2 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40">
