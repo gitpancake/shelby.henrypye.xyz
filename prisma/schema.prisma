@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// Existing tables in shared DB — DO NOT MODIFY, just here so Prisma doesn't drop them
+model jobs {
+  id                  String    @id
+  title               String
+  company             String
+  description         String?
+  location            String?
+  applicationDate     DateTime  @default(now())
+  status              JobStatus @default(APPLIED)
+  linkedinContactUrl  String?
+  linkedinContactName String?
+  hasMessagedContact  Boolean   @default(false)
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime
+  salaryMin           Int?
+  salaryMax           Int?
+  salaryCurrency      String?
+  responsibilities    String[]  @default([])
+  requirements        String[]  @default([])
+  benefits            String[]  @default([])
+  workArrangement     String?
+  suitabilityScore    Int?
+  suitabilityReason   String?
+  aiAnalyzedAt        DateTime?
+  suggestedNextSteps  String[]  @default([])
+}
+
+model trip_projects {
+  id             String   @id
+  title          String
+  start_date     DateTime @db.Date
+  end_date       DateTime @db.Date
+  itinerary_text String
+  route_hints    String?
+  settings       Json
+  days           Json
+  created_at     BigInt
+  updated_at     BigInt
+
+  @@index([updated_at(sort: Desc)], map: "idx_trip_projects_updated_at")
+}
+
+model user_cv {
+  id        String   @id
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+enum JobStatus {
+  APPLIED
+  INTERVIEWING
+  ACCEPTED
+  REJECTED
+}
+
+// Shelby app tables
+model ShelbyVehicle {
+  id              String                @id @default(cuid())
+  vin             String                @unique
+  licensePlate    String
+  mileage         Int
+  make            String
+  model           String
+  year            Int
+  trim            String?
+  bodyClass       String?
+  driveType       String?
+  engineCylinders Int?
+  engineModel     String?
+  displacementL   Float?
+  fuelType        String?
+  plantCountry    String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  documents       ShelbyDocument[]
+  serviceRecords  ShelbyServiceRecord[]
+  components      ShelbyComponent[]
+
+  @@map("shelby_vehicle")
+}
+
+model ShelbyDocument {
+  id               String               @id @default(cuid())
+  vehicleId        String
+  vehicle          ShelbyVehicle        @relation(fields: [vehicleId], references: [id])
+  originalFilename String
+  storedFilename   String
+  fileSize         Int
+  mimeType         String
+  status           DocumentStatus       @default(PENDING)
+  errorMessage     String?
+  uploadedAt       DateTime             @default(now())
+  processedAt      DateTime?
+  serviceRecords   ShelbyServiceRecord[]
+
+  @@map("shelby_document")
+}
+
+model ShelbyServiceRecord {
+  id          String                  @id @default(cuid())
+  vehicleId   String
+  vehicle     ShelbyVehicle           @relation(fields: [vehicleId], references: [id])
+  documentId  String
+  document    ShelbyDocument          @relation(fields: [documentId], references: [id])
+  serviceDate DateTime                @db.Date
+  mileage     Int?
+  shop        String?
+  notes       String?
+  lineItems   ShelbyServiceLineItem[]
+  createdAt   DateTime                @default(now())
+
+  @@map("shelby_service_record")
+}
+
+model ShelbyServiceLineItem {
+  id              String              @id @default(cuid())
+  serviceRecordId String
+  serviceRecord   ShelbyServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  description     String
+  componentId     String
+  component       ShelbyComponent     @relation(fields: [componentId], references: [id])
+  cost            Float?
+  createdAt       DateTime            @default(now())
+
+  @@map("shelby_service_line_item")
+}
+
+model ShelbyComponent {
+  id        String                  @id @default(cuid())
+  vehicleId String
+  vehicle   ShelbyVehicle           @relation(fields: [vehicleId], references: [id])
+  name      String
+  category  String?
+  lineItems ShelbyServiceLineItem[]
+  createdAt DateTime                @default(now())
+
+  @@unique([vehicleId, name])
+  @@map("shelby_component")
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

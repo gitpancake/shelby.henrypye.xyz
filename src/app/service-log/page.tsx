@@ -1,0 +1,117 @@
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { PageShell } from "@/components/PageShell";
+import { GradientDivider } from "@/components/GradientDivider";
+
+export const dynamic = "force-dynamic";
+
+export default async function ServiceLogPage() {
+  const vehicle = await prisma.shelbyVehicle.findFirst();
+  if (!vehicle) redirect("/setup");
+
+  const records = await prisma.shelbyServiceRecord.findMany({
+    where: { vehicleId: vehicle.id },
+    orderBy: { serviceDate: "desc" },
+    include: {
+      lineItems: {
+        include: { component: true },
+      },
+      document: {
+        select: { originalFilename: true },
+      },
+    },
+  });
+
+  return (
+    <PageShell>
+      <GradientDivider label="Service Log" />
+
+      <div className="mt-8 space-y-4">
+        {records.length === 0 && (
+          <p className="text-center text-xs font-mono text-neutral-600">
+            No service records yet. Upload documents to get started.
+          </p>
+        )}
+
+        {records.map((record) => {
+          const date = new Date(record.serviceDate);
+          const formatted = date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+          const totalCost = record.lineItems.reduce(
+            (sum, li) => sum + (li.cost ?? 0),
+            0
+          );
+
+          return (
+            <div
+              key={record.id}
+              className="rounded-xl border border-neutral-800/60 bg-white/[0.01] overflow-hidden"
+            >
+              {/* Header */}
+              <div className="px-4 pt-4 pb-3 flex items-start justify-between">
+                <div>
+                  <p className="text-lg font-mono text-white tabular-nums">
+                    {formatted}
+                  </p>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    {record.mileage && (
+                      <span className="text-[10px] font-mono tracking-wider text-neutral-500">
+                        {record.mileage.toLocaleString()} MI
+                      </span>
+                    )}
+                    {record.shop && (
+                      <span className="text-[10px] font-mono tracking-wider text-neutral-500">
+                        {record.shop}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {totalCost > 0 && (
+                  <span className="text-sm font-mono text-neutral-400">
+                    ${totalCost.toFixed(2)}
+                  </span>
+                )}
+              </div>
+
+              {/* Line items */}
+              <div className="border-t border-neutral-800/40 divide-y divide-neutral-800/30">
+                {record.lineItems.map((li) => (
+                  <div
+                    key={li.id}
+                    className="px-4 py-2.5 flex items-center justify-between"
+                  >
+                    <div>
+                      <span className="text-xs font-mono text-neutral-300">
+                        {li.component.name}
+                      </span>
+                      {li.description !== li.component.name && (
+                        <span className="text-[10px] text-neutral-600 ml-2">
+                          {li.description}
+                        </span>
+                      )}
+                    </div>
+                    {li.cost != null && li.cost > 0 && (
+                      <span className="text-[10px] font-mono text-neutral-500">
+                        ${li.cost.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className="px-4 py-2 border-t border-neutral-800/40 bg-white/[0.01]">
+                <span className="text-[9px] font-mono text-neutral-700 tracking-wider">
+                  Source: {record.document.originalFilename}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </PageShell>
+  );
+}
