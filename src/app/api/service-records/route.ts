@@ -40,6 +40,7 @@ export async function POST(request: Request) {
             componentName,
             category,
             cost,
+            currency,
             mileage,
             shop,
             notes,
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
                 serviceDate: new Date(date),
                 mileage: mileage ? Number(mileage) : null,
                 shop: shop || null,
+                currency: currency || "USD",
                 notes: notes || null,
                 lineItems: {
                     create: {

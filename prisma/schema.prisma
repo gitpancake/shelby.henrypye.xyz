@@ -120,6 +120,7 @@ model ShelbyServiceRecord {
   serviceDate DateTime                @db.Date
   mileage     Int?
   shop        String?
+  currency    String                  @default("USD")
   notes       String?
   lineItems    ShelbyServiceLineItem[]
   serviceNotes ShelbyNote[]

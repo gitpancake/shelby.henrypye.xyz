@@ -70,6 +70,7 @@ export async function POST(
                             serviceDate: new Date(record.serviceDate),
                             mileage: record.mileage,
                             shop: record.shop,
+                            currency: record.currency || "USD",
                             notes: record.notes,
                         },
                     });

@@ -89,7 +89,10 @@ export default async function ServiceLogPage() {
                                 </div>
                                 {totalCost > 0 && (
                                     <span className="text-sm font-mono text-neutral-400">
-                                        ${totalCost.toFixed(2)}
+                                        {record.currency === "CAD"
+                                            ? "CA$"
+                                            : "$"}
+                                        {totalCost.toFixed(2)}
                                     </span>
                                 )}
                             </div>
@@ -115,7 +118,10 @@ export default async function ServiceLogPage() {
                                             </div>
                                             {li.cost != null && li.cost > 0 && (
                                                 <span className="text-[10px] font-mono text-neutral-500">
-                                                    ${li.cost.toFixed(2)}
+                                                    {record.currency === "CAD"
+                                                        ? "CA$"
+                                                        : "$"}
+                                                    {li.cost.toFixed(2)}
                                                 </span>
                                             )}
                                         </div>

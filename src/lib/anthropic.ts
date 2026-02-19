@@ -9,6 +9,7 @@ Return ONLY valid JSON matching this schema — no markdown, no code fences, jus
       "serviceDate": "YYYY-MM-DD",
       "mileage": number | null,
       "shop": "string | null",
+      "currency": "USD | CAD",
       "notes": "string | null",
       "lineItems": [
         {
@@ -67,6 +68,13 @@ Parts purchase receipt rules:
 - Core charges should NOT be separate line items — just note them in the record's "notes" field (e.g. "Core charge: $40.00")
 - Use the receipt date as the service date. Use pre-tax item prices for costs.
 
+Currency detection rules:
+- Determine the currency for each record: "USD" or "CAD"
+- Look for explicit currency indicators: "$CAD", "CA$", "CDN$", Canadian addresses/provinces, or Canadian tax labels (GST, PST, HST)
+- US indicators: US state abbreviations, US tax labels, US addresses
+- If the shop/store is located in Canada, use "CAD". If in the US, use "USD".
+- Default to "USD" if currency cannot be determined
+
 Odometer reading extraction rules:
 - Extract standalone mileage/odometer readings that are NOT already associated with a service record
 - Handwritten logbook pages may use DD/MM/YYYY date format — convert to YYYY-MM-DD
@@ -96,6 +104,7 @@ export interface ExtractedRecord {
     serviceDate: string;
     mileage: number | null;
     shop: string | null;
+    currency?: string;
     notes: string | null;
     lineItems: ExtractedLineItem[];
     serviceNotes?: ExtractedNote[];

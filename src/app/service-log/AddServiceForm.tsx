@@ -32,6 +32,7 @@ export function AddServiceForm() {
     const [componentName, setComponentName] = useState("");
     const [category, setCategory] = useState("Engine");
     const [cost, setCost] = useState("");
+    const [currency, setCurrency] = useState("USD");
     const [mileage, setMileage] = useState("");
     const [shop, setShop] = useState("");
     const [notes, setNotes] = useState("");
@@ -42,6 +43,7 @@ export function AddServiceForm() {
         setComponentName("");
         setCategory("Engine");
         setCost("");
+        setCurrency("USD");
         setMileage("");
         setShop("");
         setNotes("");
@@ -63,6 +65,7 @@ export function AddServiceForm() {
                     componentName,
                     category,
                     cost: cost || null,
+                    currency,
                     mileage: mileage || null,
                     shop: shop || null,
                     notes: notes || null,
@@ -78,7 +81,9 @@ export function AddServiceForm() {
             setOpen(false);
             router.refresh();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong");
+            setError(
+                err instanceof Error ? err.message : "Something went wrong",
+            );
         } finally {
             setSaving(false);
         }
@@ -115,17 +120,27 @@ export function AddServiceForm() {
                 </div>
                 <div>
                     <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
-                        Cost ($)
+                        Cost
                     </label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={cost}
-                        onChange={(e) => setCost(e.target.value)}
-                        placeholder="0.00"
-                        className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
-                    />
+                    <div className="flex gap-1.5">
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={cost}
+                            onChange={(e) => setCost(e.target.value)}
+                            placeholder="0.00"
+                            className="flex-1 rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                        />
+                        <select
+                            value={currency}
+                            onChange={(e) => setCurrency(e.target.value)}
+                            className="rounded-lg border border-neutral-800/60 bg-[#060606] px-2 py-2 font-mono text-xs text-white"
+                        >
+                            <option value="USD">USD</option>
+                            <option value="CAD">CAD</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
