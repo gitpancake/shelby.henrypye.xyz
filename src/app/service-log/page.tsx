@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
 import { AddServiceForm } from "./AddServiceForm";
+import { CurrencyToggle } from "./CurrencyToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -158,12 +159,16 @@ export default async function ServiceLogPage() {
                             )}
 
                             {/* Footer */}
-                            <div className="px-4 py-2 border-t border-neutral-800/40 bg-white/[0.01]">
+                            <div className="px-4 py-2 border-t border-neutral-800/40 bg-white/[0.01] flex items-center justify-between">
                                 <span className="text-[9px] font-mono text-neutral-700 tracking-wider">
                                     {record.document
                                         ? `Source: ${record.document.originalFilename}`
                                         : "Manual entry"}
                                 </span>
+                                <CurrencyToggle
+                                    recordId={record.id}
+                                    currency={record.currency}
+                                />
                             </div>
                         </div>
                     );
