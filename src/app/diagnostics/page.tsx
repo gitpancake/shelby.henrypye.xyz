@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
 import { AttentionSection } from "./AttentionSection";
+import { ComponentHealthSection } from "./ComponentHealthSection";
 
 export const dynamic = "force-dynamic";
 
@@ -114,10 +115,11 @@ export default async function DiagnosticsPage() {
         const totalCost = c.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0);
 
         return {
+            id: c.id,
             name: c.name,
             category: c.category ?? "Other",
             timesServiced: c.lineItems.length,
-            lastDate,
+            lastDate: lastDate ? new Date(lastDate).toISOString() : null,
             lastMileage,
             daysSince,
             milesSince,
@@ -214,85 +216,11 @@ export default async function DiagnosticsPage() {
             {/* Component Health */}
             <div className="mt-10">
                 <GradientDivider label="Component Health" />
-                <div className="mt-6 space-y-2">
-                    {componentHealth.map((c) => {
-                        // Urgency tinting based on miles since service
-                        let borderClass = "border-neutral-800/60";
-                        let bgClass = "bg-white/[0.01]";
-                        if (c.milesSince != null) {
-                            if (c.milesSince > 30000) {
-                                borderClass = "border-red-900/30";
-                                bgClass = "bg-red-500/[0.02]";
-                            } else if (c.milesSince > 15000) {
-                                borderClass = "border-amber-900/30";
-                                bgClass = "bg-amber-500/[0.02]";
-                            }
-                        }
-
-                        return (
-                            <div
-                                key={c.name}
-                                className={`rounded-xl border ${borderClass} ${bgClass} px-4 py-3`}
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <p className="text-xs font-mono text-white">
-                                            {c.name}
-                                        </p>
-                                        <div className="flex items-center gap-3 mt-0.5">
-                                            <span className="text-[9px] font-mono tracking-wider uppercase text-neutral-700">
-                                                {c.category}
-                                            </span>
-                                            <span className="text-[9px] font-mono text-neutral-600">
-                                                {c.timesServiced}x serviced
-                                            </span>
-                                            {c.totalCost > 0 && (
-                                                <span className="text-[9px] font-mono text-neutral-600">
-                                                    ${c.totalCost.toFixed(0)}{" "}
-                                                    total
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        {c.lastDate && (
-                                            <p className="text-[10px] font-mono text-neutral-500">
-                                                {formatDate(c.lastDate)}
-                                            </p>
-                                        )}
-                                        <div className="flex items-center gap-2 mt-0.5 justify-end">
-                                            {c.milesSince != null && (
-                                                <span
-                                                    className={`text-[10px] font-mono tabular-nums ${
-                                                        c.milesSince > 30000
-                                                            ? "text-red-400/80"
-                                                            : c.milesSince >
-                                                                15000
-                                                              ? "text-amber-400/80"
-                                                              : "text-neutral-600"
-                                                    }`}
-                                                >
-                                                    {c.milesSince.toLocaleString()}{" "}
-                                                    mi ago
-                                                </span>
-                                            )}
-                                            {c.daysSince != null && (
-                                                <span className="text-[10px] font-mono text-neutral-700 tabular-nums">
-                                                    {c.daysSince}d
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-
-                    {componentHealth.length === 0 && (
-                        <p className="text-center text-xs font-mono text-neutral-600">
-                            No components tracked yet
-                        </p>
-                    )}
+                <div className="mt-6">
+                    <ComponentHealthSection
+                        components={componentHealth}
+                        serviceRecords={serviceRecordOptions}
+                    />
                 </div>
             </div>
 
