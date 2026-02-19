@@ -11,6 +11,7 @@ export async function POST() {
         await prisma.shelbyServiceLineItem.deleteMany();
         await prisma.shelbyServiceRecord.deleteMany();
         await prisma.shelbyOdometerReading.deleteMany();
+        await prisma.shelbyDiagnosticReport.deleteMany();
 
         // Get all document filenames to delete from storage
         const documents = await prisma.shelbyDocument.findMany({

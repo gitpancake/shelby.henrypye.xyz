@@ -84,10 +84,11 @@ model ShelbyVehicle {
   plantCountry    String?
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
-  documents         ShelbyDocument[]
-  serviceRecords    ShelbyServiceRecord[]
-  components        ShelbyComponent[]
-  odometerReadings  ShelbyOdometerReading[]
+  documents          ShelbyDocument[]
+  serviceRecords     ShelbyServiceRecord[]
+  components         ShelbyComponent[]
+  odometerReadings   ShelbyOdometerReading[]
+  diagnosticReports  ShelbyDiagnosticReport[]
 
   @@map("shelby_vehicle")
 }
@@ -185,6 +186,17 @@ model ShelbyOdometerReading {
   createdAt  DateTime        @default(now())
 
   @@map("shelby_odometer_reading")
+}
+
+model ShelbyDiagnosticReport {
+  id        String        @id @default(cuid())
+  vehicleId String
+  vehicle   ShelbyVehicle @relation(fields: [vehicleId], references: [id])
+  mileage   Int
+  content   Json
+  createdAt DateTime      @default(now())
+
+  @@map("shelby_diagnostic_report")
 }
 
 enum DocumentStatus {

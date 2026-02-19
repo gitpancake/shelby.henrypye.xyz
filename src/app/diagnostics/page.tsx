@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
 import { ComponentHealthSection } from "./ComponentHealthSection";
+import { RunDiagnosticButton } from "./RunDiagnosticButton";
+import type { DiagnosticResult } from "@/lib/anthropic";
 
 export const dynamic = "force-dynamic";
 
@@ -10,13 +12,12 @@ export default async function DiagnosticsPage() {
     const vehicle = await prisma.shelbyVehicle.findFirst();
     if (!vehicle) redirect("/setup");
 
-    const [records, components, notes] = await Promise.all([
+    const [records, components, latestReport] = await Promise.all([
         prisma.shelbyServiceRecord.findMany({
             where: { vehicleId: vehicle.id },
             orderBy: { serviceDate: "desc" },
             include: {
                 lineItems: { include: { component: true } },
-                serviceNotes: true,
             },
         }),
         prisma.shelbyComponent.findMany({
@@ -37,15 +38,8 @@ export default async function DiagnosticsPage() {
             },
             orderBy: [{ category: "asc" }, { name: "asc" }],
         }),
-        prisma.shelbyNote.findMany({
-            where: {
-                serviceRecord: { vehicleId: vehicle.id },
-            },
-            include: {
-                serviceRecord: {
-                    select: { serviceDate: true, mileage: true, shop: true },
-                },
-            },
+        prisma.shelbyDiagnosticReport.findFirst({
+            where: { vehicleId: vehicle.id },
             orderBy: { createdAt: "desc" },
         }),
     ]);
@@ -60,11 +54,6 @@ export default async function DiagnosticsPage() {
     const earliestDate =
         records.length > 0 ? records[records.length - 1].serviceDate : null;
     const latestDate = records.length > 0 ? records[0].serviceDate : null;
-
-    // Concerns, recommendations, measurements
-    const concerns = notes.filter((n) => n.type === "CONCERN");
-    const recommendations = notes.filter((n) => n.type === "RECOMMENDATION");
-    const measurements = notes.filter((n) => n.type === "MEASUREMENT");
 
     // Component health data
     const now = new Date();
@@ -103,7 +92,6 @@ export default async function DiagnosticsPage() {
         };
     });
 
-    // Sort by miles since last service (highest first), nulls at end
     componentHealth.sort((a, b) => {
         if (a.milesSince == null && b.milesSince == null) return 0;
         if (a.milesSince == null) return 1;
@@ -111,12 +99,16 @@ export default async function DiagnosticsPage() {
         return b.milesSince - a.milesSince;
     });
 
-    const formatDate = (d: Date) =>
+    const formatDate = (d: Date | string) =>
         new Date(d).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
         });
+
+    const report = latestReport
+        ? (latestReport.content as unknown as DiagnosticResult)
+        : null;
 
     return (
         <PageShell>
@@ -176,82 +168,134 @@ export default async function DiagnosticsPage() {
                 ))}
             </div>
 
-            {/* Attention Required */}
-            {(concerns.length > 0 || recommendations.length > 0) && (
-                <div className="mt-10">
-                    <GradientDivider label="Attention Required" />
-                    <div className="mt-6 space-y-3">
-                        {concerns.map((note) => (
-                            <div
-                                key={note.id}
-                                className="rounded-xl border border-red-900/30 bg-red-500/[0.03] px-4 py-3"
-                            >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-red-400/80">
-                                        Concern
-                                    </span>
-                                    <span className="text-[10px] font-mono text-neutral-500">
-                                        {formatDate(
-                                            note.serviceRecord.serviceDate,
-                                        )}
-                                        {note.serviceRecord.mileage && (
-                                            <>
-                                                {" "}
-                                                &middot;{" "}
-                                                {note.serviceRecord.mileage.toLocaleString()}{" "}
-                                                mi
-                                            </>
-                                        )}
-                                        {note.serviceRecord.shop && (
-                                            <>
-                                                {" "}
-                                                &middot;{" "}
-                                                {note.serviceRecord.shop}
-                                            </>
-                                        )}
-                                    </span>
-                                </div>
-                                <p className="text-xs font-mono text-neutral-300">
-                                    {note.title}
-                                </p>
-                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
-                                    {note.content}
-                                </p>
-                            </div>
-                        ))}
+            {/* Run Diagnostic */}
+            <div className="mt-8">
+                <RunDiagnosticButton />
+            </div>
 
-                        {recommendations.map((note) => (
-                            <div
-                                key={note.id}
-                                className="rounded-xl border border-amber-900/30 bg-amber-500/[0.03] px-4 py-3"
-                            >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-amber-400/80">
-                                        Recommendation
-                                    </span>
-                                    <span className="text-[10px] font-mono text-neutral-500">
-                                        {formatDate(
-                                            note.serviceRecord.serviceDate,
-                                        )}
-                                        {note.serviceRecord.mileage && (
-                                            <>
-                                                {" "}
-                                                &middot;{" "}
-                                                {note.serviceRecord.mileage.toLocaleString()}{" "}
-                                                mi
-                                            </>
-                                        )}
-                                    </span>
+            {/* Latest Report */}
+            {report && latestReport && (
+                <div className="mt-8 space-y-4">
+                    <GradientDivider label="Diagnostic Report" />
+
+                    {/* Urgent */}
+                    {report.urgent.length > 0 && (
+                        <div className="mt-6 space-y-3">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-red-400/80">
+                                Urgent
+                            </p>
+                            {report.urgent.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className="rounded-xl border border-red-900/30 bg-red-500/[0.03] px-4 py-3"
+                                >
+                                    <p className="text-xs font-mono text-red-300">
+                                        {item.title}
+                                    </p>
+                                    {item.component && (
+                                        <span className="inline-block mt-1 text-[9px] font-mono tracking-[0.2em] uppercase text-red-400/60">
+                                            {item.component}
+                                        </span>
+                                    )}
+                                    <p className="text-[11px] leading-relaxed text-neutral-400 mt-1.5">
+                                        {item.detail}
+                                    </p>
                                 </div>
-                                <p className="text-xs font-mono text-neutral-300">
-                                    {note.title}
-                                </p>
-                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
-                                    {note.content}
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Upcoming */}
+                    {report.upcoming.length > 0 && (
+                        <div className="space-y-3">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-amber-400/80">
+                                Upcoming Maintenance
+                            </p>
+                            {report.upcoming.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className="rounded-xl border border-amber-900/30 bg-amber-500/[0.03] px-4 py-3"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs font-mono text-amber-300">
+                                            {item.title}
+                                        </p>
+                                        {item.estimatedMiles && (
+                                            <span className="text-[10px] font-mono text-amber-400/60 tabular-nums">
+                                                ~
+                                                {item.estimatedMiles.toLocaleString()}{" "}
+                                                mi
+                                            </span>
+                                        )}
+                                    </div>
+                                    {item.component && (
+                                        <span className="inline-block mt-1 text-[9px] font-mono tracking-[0.2em] uppercase text-amber-400/60">
+                                            {item.component}
+                                        </span>
+                                    )}
+                                    <p className="text-[11px] leading-relaxed text-neutral-400 mt-1.5">
+                                        {item.detail}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Monitoring */}
+                    {report.monitoring.length > 0 && (
+                        <div className="space-y-3">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-500">
+                                Monitoring
+                            </p>
+                            {report.monitoring.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className="rounded-xl border border-neutral-800/60 bg-neutral-500/[0.03] px-4 py-3"
+                                >
+                                    <p className="text-xs font-mono text-neutral-300">
+                                        {item.title}
+                                    </p>
+                                    <p className="text-[11px] leading-relaxed text-neutral-500 mt-1.5">
+                                        {item.detail}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Service Provider Notes */}
+                    {report.serviceProviderNotes && (
+                        <div className="space-y-3">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-cyan-400/80">
+                                Service Provider Notes
+                            </p>
+                            <div className="rounded-xl border border-cyan-900/20 bg-cyan-500/[0.02] px-4 py-3">
+                                <p className="text-[11px] leading-relaxed text-neutral-300 whitespace-pre-line">
+                                    {report.serviceProviderNotes}
                                 </p>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    )}
+
+                    {/* Summary */}
+                    {report.summary && (
+                        <div className="space-y-3">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-500">
+                                Overall Assessment
+                            </p>
+                            <div className="rounded-xl border border-neutral-800/60 bg-[#060606] px-4 py-3">
+                                <p className="text-[11px] leading-relaxed text-neutral-400 whitespace-pre-line">
+                                    {report.summary}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Report metadata */}
+                    <p className="text-[9px] font-mono text-neutral-600 text-center pt-2">
+                        Generated {formatDate(latestReport.createdAt)} at{" "}
+                        {latestReport.mileage.toLocaleString()} mi
+                    </p>
                 </div>
             )}
 
@@ -262,46 +306,6 @@ export default async function DiagnosticsPage() {
                     <ComponentHealthSection components={componentHealth} />
                 </div>
             </div>
-
-            {/* Measurements Log */}
-            {measurements.length > 0 && (
-                <div className="mt-10">
-                    <GradientDivider label="Measurements" />
-                    <div className="mt-6 space-y-2">
-                        {measurements.map((note) => (
-                            <div
-                                key={note.id}
-                                className="rounded-xl border border-cyan-900/20 bg-cyan-500/[0.02] px-4 py-3"
-                            >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-cyan-400/80">
-                                        Measurement
-                                    </span>
-                                    <span className="text-[10px] font-mono text-neutral-500">
-                                        {formatDate(
-                                            note.serviceRecord.serviceDate,
-                                        )}
-                                        {note.serviceRecord.mileage && (
-                                            <>
-                                                {" "}
-                                                &middot;{" "}
-                                                {note.serviceRecord.mileage.toLocaleString()}{" "}
-                                                mi
-                                            </>
-                                        )}
-                                    </span>
-                                </div>
-                                <p className="text-xs font-mono text-neutral-300">
-                                    {note.title}
-                                </p>
-                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
-                                    {note.content}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
         </PageShell>
     );
 }

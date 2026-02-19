@@ -162,3 +162,74 @@ export async function extractServiceRecords(
 
     return JSON.parse(jsonStr) as ExtractionResult;
 }
+
+export interface DiagnosticItem {
+    title: string;
+    detail: string;
+    component?: string;
+    estimatedMiles?: number;
+}
+
+export interface DiagnosticResult {
+    urgent: DiagnosticItem[];
+    upcoming: DiagnosticItem[];
+    monitoring: DiagnosticItem[];
+    summary: string;
+    serviceProviderNotes: string;
+}
+
+const DIAGNOSTIC_PROMPT = `You are a vehicle diagnostic specialist analyzing the complete service history of a vehicle. Based on the data provided, generate a comprehensive diagnostic report.
+
+Return ONLY valid JSON matching this schema — no markdown, no code fences, just raw JSON:
+{
+  "urgent": [{ "title": "Short title", "detail": "Explanation of why this is urgent", "component": "Component name if applicable" }],
+  "upcoming": [{ "title": "Short title", "detail": "What needs doing and why", "component": "Component name", "estimatedMiles": number }],
+  "monitoring": [{ "title": "Short title", "detail": "What to watch for" }],
+  "summary": "2-3 sentence overall vehicle health assessment",
+  "serviceProviderNotes": "Paragraph the owner can share with their mechanic summarizing what needs attention, recent concerns, and recommended next steps"
+}
+
+Analysis rules:
+- URGENT: Things that should be done NOW based on overdue intervals, unresolved concerns, or measurements showing critical wear
+- UPCOMING: Maintenance due within the next 5,000 miles or 6 months based on standard intervals and last service dates
+- MONITORING: Items to keep an eye on based on observations, early wear, or aging components
+- Consider standard maintenance intervals for this specific vehicle (year/make/model)
+- Cross-reference concerns and recommendations from mechanics with subsequent service records to see if they were addressed
+- Look at measurement trends (e.g. brake pad thickness decreasing across readings)
+- Factor in vehicle age and mileage for age-related maintenance (rubber hoses, seals, bushings)
+- The serviceProviderNotes should be written as if the owner is handing it to a mechanic — professional, concise, actionable
+- If there is insufficient data to make a determination, say so rather than guessing
+- Do NOT include items that have clearly been addressed in a more recent service record`;
+
+export async function runDiagnostic(
+    vehicleData: string,
+): Promise<DiagnosticResult> {
+    const client = new Anthropic();
+
+    const response = await client.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 8192,
+        system: DIAGNOSTIC_PROMPT,
+        messages: [
+            {
+                role: "user",
+                content: vehicleData,
+            },
+        ],
+    });
+
+    const textBlock = response.content.find(
+        (c): c is Anthropic.Messages.TextBlock => c.type === "text",
+    );
+
+    if (!textBlock) {
+        throw new Error("No text response from Anthropic");
+    }
+
+    const jsonStr = textBlock.text
+        .replace(/^```(?:json)?\n?/, "")
+        .replace(/\n?```$/, "")
+        .trim();
+
+    return JSON.parse(jsonStr) as DiagnosticResult;
+}
