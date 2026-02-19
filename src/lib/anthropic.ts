@@ -26,6 +26,12 @@ Return ONLY valid JSON matching this schema — no markdown, no code fences, jus
         }
       ]
     }
+  ],
+  "odometerReadings": [
+    {
+      "date": "YYYY-MM-DD",
+      "mileage": number
+    }
   ]
 }
 
@@ -51,7 +57,14 @@ Component normalization rules:
 - For CarFAX reports, extract each service event as a separate record
 - If mileage is not listed for a record, set to null
 - If a date cannot be determined precisely, use the first of the month
-- Costs should be numbers (no currency symbols). If cost is for the whole service and can't be split per item, put total on first item and null on rest.`;
+- Costs should be numbers (no currency symbols). If cost is for the whole service and can't be split per item, put total on first item and null on rest.
+
+Odometer reading extraction rules:
+- Extract standalone mileage/odometer readings that are NOT already associated with a service record
+- Handwritten logbook pages may use DD/MM/YYYY date format — convert to YYYY-MM-DD
+- If a record in "records" already has a mileage+date, do NOT duplicate it in "odometerReadings"
+- Include all odometer readings found (e.g. from logbook entries that just note mileage on a date)
+- If no standalone odometer readings are found, return an empty array for "odometerReadings"`;
 
 export interface ExtractedLineItem {
     description: string;
@@ -80,8 +93,14 @@ export interface ExtractedRecord {
     serviceNotes?: ExtractedNote[];
 }
 
+export interface ExtractedOdometerReading {
+    date: string;
+    mileage: number;
+}
+
 export interface ExtractionResult {
     records: ExtractedRecord[];
+    odometerReadings?: ExtractedOdometerReading[];
 }
 
 export async function extractServiceRecords(

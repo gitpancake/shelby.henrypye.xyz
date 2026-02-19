@@ -35,7 +35,7 @@ export async function POST(
 
         await prisma.$transaction(
             async (tx) => {
-                // If reprocessing, delete old records first (cascade: notes → line items → records)
+                // If reprocessing, delete old records first (cascade: notes → line items → records → odometer readings)
                 const existingRecords = await tx.shelbyServiceRecord.findMany({
                     where: { documentId: doc.id },
                     select: { id: true },
@@ -56,6 +56,10 @@ export async function POST(
                         where: { documentId: doc.id },
                     });
                 }
+
+                await tx.shelbyOdometerReading.deleteMany({
+                    where: { documentId: doc.id },
+                });
 
                 // Insert fresh extraction results
                 for (const record of result.records) {
@@ -110,6 +114,51 @@ export async function POST(
                             },
                         });
                     }
+                }
+
+                // Insert odometer readings
+                if (result.odometerReadings) {
+                    for (const reading of result.odometerReadings) {
+                        await tx.shelbyOdometerReading.create({
+                            data: {
+                                vehicleId: doc.vehicleId,
+                                documentId: doc.id,
+                                date: new Date(reading.date),
+                                mileage: reading.mileage,
+                                source: doc.originalFilename,
+                            },
+                        });
+                    }
+                }
+
+                // Update vehicle mileage to the most recent reading
+                const latestOdometer = await tx.shelbyOdometerReading.findFirst(
+                    {
+                        where: { vehicleId: doc.vehicleId },
+                        orderBy: { date: "desc" },
+                        select: { mileage: true },
+                    },
+                );
+
+                const latestService = await tx.shelbyServiceRecord.findFirst({
+                    where: {
+                        vehicleId: doc.vehicleId,
+                        mileage: { not: null },
+                    },
+                    orderBy: { serviceDate: "desc" },
+                    select: { mileage: true },
+                });
+
+                const maxMileage = Math.max(
+                    latestOdometer?.mileage ?? 0,
+                    latestService?.mileage ?? 0,
+                );
+
+                if (maxMileage > 0) {
+                    await tx.shelbyVehicle.update({
+                        where: { id: doc.vehicleId },
+                        data: { mileage: maxMileage },
+                    });
                 }
             },
             { timeout: 60000 },
