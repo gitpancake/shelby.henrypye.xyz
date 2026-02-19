@@ -68,7 +68,7 @@ Parts purchase receipt rules:
 - If the receipt contains motor oil (any brand/weight), assume an OIL CHANGE was performed: create TWO line items — one for "Engine Oil" (Fluids) and one for "Oil Filter" (Filters). Use the oil description including brand and weight in the Engine Oil description (e.g. "Mobil 1 Extended Performance 5W-30 Motor Oil"). Set Oil Filter cost to null (assumed on hand).
 - If the receipt contains a specific component (e.g. alternator, battery, brake pads), assume it was INSTALLED on that date. Use the description including the brand/model/part number (e.g. "Duralast 12802 Import Alternator"). Add an OBSERVATION note with the part details: brand, part number, and any specs visible on the receipt.
 - Core charges should NOT be separate line items — just note them in the record's "notes" field (e.g. "Core charge: $40.00")
-- Use the receipt date as the service date. For receipts ONLY (not service invoices), use pre-tax item prices for costs.
+- Use the receipt date as the service date. Use the sale total (post-tax) for costs — split proportionally across items if needed.
 
 Currency detection rules:
 - Determine the currency for each record: "USD" or "CAD"
