@@ -9,6 +9,7 @@ const NAV_ITEMS = [
     { href: "/documents", label: "Documents" },
     { href: "/service-log", label: "Service Log" },
     { href: "/maintenance", label: "Components" },
+    { href: "/diagnostics", label: "Diagnostics" },
 ];
 
 export function PageShell({ children }: { children: React.ReactNode }) {
