@@ -81,3 +81,29 @@ export async function PATCH(
 
     return NextResponse.json({ error: "No valid action" }, { status: 400 });
 }
+
+export async function DELETE(
+    _request: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+) {
+    const { id } = await params;
+
+    try {
+        await prisma.shelbyNote.deleteMany({
+            where: { serviceRecordId: id },
+        });
+        await prisma.shelbyServiceLineItem.deleteMany({
+            where: { serviceRecordId: id },
+        });
+        await prisma.shelbyServiceRecord.delete({
+            where: { id },
+        });
+
+        return NextResponse.json({ ok: true });
+    } catch {
+        return NextResponse.json(
+            { error: "Record not found" },
+            { status: 404 },
+        );
+    }
+}

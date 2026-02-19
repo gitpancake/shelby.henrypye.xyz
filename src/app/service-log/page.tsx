@@ -5,6 +5,7 @@ import { GradientDivider } from "@/components/GradientDivider";
 import { AddServiceForm } from "./AddServiceForm";
 import { CurrencyToggle } from "./CurrencyToggle";
 import { GuessDateButton } from "./GuessDateButton";
+import { DeleteRecordButton } from "./DeleteRecordButton";
 
 export const dynamic = "force-dynamic";
 
@@ -181,10 +182,13 @@ export default async function ServiceLogPage() {
                                         ? `Source: ${record.document.originalFilename}`
                                         : "Manual entry"}
                                 </span>
-                                <CurrencyToggle
-                                    recordId={record.id}
-                                    currency={record.currency}
-                                />
+                                <div className="flex items-center gap-3">
+                                    <CurrencyToggle
+                                        recordId={record.id}
+                                        currency={record.currency}
+                                    />
+                                    <DeleteRecordButton recordId={record.id} />
+                                </div>
                             </div>
                         </div>
                     );
