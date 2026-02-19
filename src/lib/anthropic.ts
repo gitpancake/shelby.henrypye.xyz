@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const SYSTEM_PROMPT = `You are a vehicle service record extraction system. You analyze service documents (invoices, repair orders, CarFAX reports) and extract structured data.
+const SYSTEM_PROMPT = `You are a vehicle service record extraction system. You analyze service documents (invoices, repair orders, CarFAX reports, and parts purchase receipts) and extract structured data.
 
 Return ONLY valid JSON matching this schema — no markdown, no code fences, just raw JSON:
 {
@@ -58,6 +58,14 @@ Component normalization rules:
 - If mileage is not listed for a record, set to null
 - If a date cannot be determined precisely, use the first of the month
 - Costs should be numbers (no currency symbols). If cost is for the whole service and can't be split per item, put total on first item and null on rest.
+
+Parts purchase receipt rules:
+- Receipts from auto parts stores (AutoZone, O'Reilly, NAPA, etc.) should be treated as service records — the owner bought and installed the parts
+- Use the store name as the "shop" field (e.g. "AutoZone 05372 — Los Angeles, CA")
+- If the receipt contains motor oil (any brand/weight), assume an OIL CHANGE was performed: create TWO line items — one for "Engine Oil" (Fluids) and one for "Oil Filter" (Filters). Use the oil description including brand and weight in the Engine Oil description (e.g. "Mobil 1 Extended Performance 5W-30 Motor Oil"). Set Oil Filter cost to null (assumed on hand).
+- If the receipt contains a specific component (e.g. alternator, battery, brake pads), assume it was INSTALLED on that date. Use the description including the brand/model/part number (e.g. "Duralast 12802 Import Alternator"). Add an OBSERVATION note with the part details: brand, part number, and any specs visible on the receipt.
+- Core charges should NOT be separate line items — just note them in the record's "notes" field (e.g. "Core charge: $40.00")
+- Use the receipt date as the service date. Use pre-tax item prices for costs.
 
 Odometer reading extraction rules:
 - Extract standalone mileage/odometer readings that are NOT already associated with a service record
