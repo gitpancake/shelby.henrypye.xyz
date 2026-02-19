@@ -1,5 +1,4 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { readFileSync } from "fs";
 
 const SYSTEM_PROMPT = `You are a vehicle service record extraction system. You analyze service documents (invoices, repair orders, CarFAX reports) and extract structured data.
 
@@ -86,11 +85,11 @@ export interface ExtractionResult {
 }
 
 export async function extractServiceRecords(
-    filePath: string,
+    fileBuffer: Buffer,
     mimeType: string,
 ): Promise<ExtractionResult> {
     const client = new Anthropic();
-    const fileData = readFileSync(filePath).toString("base64");
+    const fileData = fileBuffer.toString("base64");
 
     const isImage = mimeType.startsWith("image/");
 

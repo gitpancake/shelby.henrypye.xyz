@@ -97,10 +97,19 @@ export function DocumentCard({ doc }: DocumentCardProps) {
             </div>
 
             {localStatus === "COMPLETED" && doc._count.serviceRecords > 0 && (
-                <p className="text-[10px] font-mono text-neutral-500 mt-3">
-                    {doc._count.serviceRecords} service record
-                    {doc._count.serviceRecords !== 1 ? "s" : ""} extracted
-                </p>
+                <div className="mt-3 flex items-center justify-between">
+                    <p className="text-[10px] font-mono text-neutral-500">
+                        {doc._count.serviceRecords} service record
+                        {doc._count.serviceRecords !== 1 ? "s" : ""} extracted
+                    </p>
+                    <button
+                        type="button"
+                        onClick={handleProcess}
+                        className="rounded-md border border-neutral-800 px-2 py-1 text-[9px] font-mono tracking-wider uppercase text-neutral-600 transition-colors hover:bg-white/5 hover:text-neutral-400"
+                    >
+                        Reprocess
+                    </button>
+                </div>
             )}
 
             {localStatus === "PROCESSING" && (

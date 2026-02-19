@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getUploadPath } from "@/lib/files";
+import { getUploadBuffer } from "@/lib/files";
 import { extractServiceRecords } from "@/lib/anthropic";
 
 export async function POST(
@@ -30,11 +30,34 @@ export async function POST(
     });
 
     try {
-        const filePath = getUploadPath(doc.storedFilename);
-        const result = await extractServiceRecords(filePath, doc.mimeType);
+        const fileBuffer = await getUploadBuffer(doc.storedFilename);
+        const result = await extractServiceRecords(fileBuffer, doc.mimeType);
 
         await prisma.$transaction(
             async (tx) => {
+                // If reprocessing, delete old records first (cascade: notes → line items → records)
+                const existingRecords = await tx.shelbyServiceRecord.findMany({
+                    where: { documentId: doc.id },
+                    select: { id: true },
+                });
+
+                if (existingRecords.length > 0) {
+                    const recordIds = existingRecords.map((r) => r.id);
+
+                    await tx.shelbyNote.deleteMany({
+                        where: { serviceRecordId: { in: recordIds } },
+                    });
+
+                    await tx.shelbyServiceLineItem.deleteMany({
+                        where: { serviceRecordId: { in: recordIds } },
+                    });
+
+                    await tx.shelbyServiceRecord.deleteMany({
+                        where: { documentId: doc.id },
+                    });
+                }
+
+                // Insert fresh extraction results
                 for (const record of result.records) {
                     const serviceRecord = await tx.shelbyServiceRecord.create({
                         data: {
