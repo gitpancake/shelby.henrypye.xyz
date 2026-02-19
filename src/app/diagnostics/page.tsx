@@ -26,7 +26,11 @@ export default async function DiagnosticsPage() {
                 lineItems: {
                     include: {
                         serviceRecord: {
-                            select: { serviceDate: true, mileage: true },
+                            select: {
+                                serviceDate: true,
+                                mileage: true,
+                                shop: true,
+                            },
                         },
                     },
                     orderBy: { createdAt: "desc" },
@@ -114,6 +118,14 @@ export default async function DiagnosticsPage() {
             lastMileage != null ? vehicle.mileage - lastMileage : null;
         const totalCost = c.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0);
 
+        const serviceHistory = c.lineItems.map((li) => ({
+            date: new Date(li.serviceRecord.serviceDate).toISOString(),
+            mileage: li.serviceRecord.mileage,
+            shop: li.serviceRecord.shop,
+            description: li.description,
+            cost: li.cost,
+        }));
+
         return {
             id: c.id,
             name: c.name,
@@ -124,6 +136,7 @@ export default async function DiagnosticsPage() {
             daysSince,
             milesSince,
             totalCost,
+            serviceHistory,
         };
     });
 
