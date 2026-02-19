@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
+import { AttentionSection } from "./AttentionSection";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,9 @@ export default async function DiagnosticsPage() {
             include: {
                 lineItems: {
                     include: {
-                        serviceRecord: { select: { serviceDate: true, mileage: true } },
+                        serviceRecord: {
+                            select: { serviceDate: true, mileage: true },
+                        },
                     },
                     orderBy: { createdAt: "desc" },
                 },
@@ -38,6 +41,14 @@ export default async function DiagnosticsPage() {
                 serviceRecord: {
                     select: { serviceDate: true, mileage: true, shop: true },
                 },
+                resolvedByRecord: {
+                    select: {
+                        id: true,
+                        serviceDate: true,
+                        mileage: true,
+                        shop: true,
+                    },
+                },
             },
             orderBy: { createdAt: "desc" },
         }),
@@ -50,12 +61,40 @@ export default async function DiagnosticsPage() {
         (sum, r) => sum + r.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0),
         0,
     );
-    const earliestDate = records.length > 0 ? records[records.length - 1].serviceDate : null;
+    const earliestDate =
+        records.length > 0 ? records[records.length - 1].serviceDate : null;
     const latestDate = records.length > 0 ? records[0].serviceDate : null;
 
-    // Concerns and recommendations
-    const concerns = notes.filter((n) => n.type === "CONCERN");
-    const recommendations = notes.filter((n) => n.type === "RECOMMENDATION");
+    // Concerns, recommendations, measurements
+    const attentionNotes = notes
+        .filter((n) => n.type === "CONCERN" || n.type === "RECOMMENDATION")
+        .map((n) => ({
+            id: n.id,
+            type: n.type,
+            title: n.title,
+            content: n.content,
+            serviceRecord: {
+                serviceDate: n.serviceRecord.serviceDate.toISOString(),
+                mileage: n.serviceRecord.mileage,
+                shop: n.serviceRecord.shop,
+            },
+            resolvedByRecord: n.resolvedByRecord
+                ? {
+                      id: n.resolvedByRecord.id,
+                      serviceDate: n.resolvedByRecord.serviceDate.toISOString(),
+                      mileage: n.resolvedByRecord.mileage,
+                      shop: n.resolvedByRecord.shop,
+                  }
+                : null,
+        }));
+
+    const serviceRecordOptions = records.map((r) => ({
+        id: r.id,
+        serviceDate: r.serviceDate.toISOString(),
+        mileage: r.mileage,
+        shop: r.shop,
+    }));
+
     const measurements = notes.filter((n) => n.type === "MEASUREMENT");
 
     // Component health data
@@ -65,9 +104,13 @@ export default async function DiagnosticsPage() {
         const lastDate = latestLineItem?.serviceRecord.serviceDate ?? null;
         const lastMileage = latestLineItem?.serviceRecord.mileage ?? null;
         const daysSince = lastDate
-            ? Math.floor((now.getTime() - new Date(lastDate).getTime()) / (1000 * 60 * 60 * 24))
+            ? Math.floor(
+                  (now.getTime() - new Date(lastDate).getTime()) /
+                      (1000 * 60 * 60 * 24),
+              )
             : null;
-        const milesSince = lastMileage != null ? vehicle.mileage - lastMileage : null;
+        const milesSince =
+            lastMileage != null ? vehicle.mileage - lastMileage : null;
         const totalCost = c.lineItems.reduce((s, li) => s + (li.cost ?? 0), 0);
 
         return {
@@ -106,10 +149,19 @@ export default async function DiagnosticsPage() {
                 {[
                     { label: "Records", value: totalRecords.toString() },
                     { label: "Components", value: totalComponents.toString() },
-                    { label: "Total Spent", value: totalSpent > 0 ? `$${totalSpent.toFixed(0)}` : "$0" },
+                    {
+                        label: "Total Spent",
+                        value:
+                            totalSpent > 0 ? `$${totalSpent.toFixed(0)}` : "$0",
+                    },
                 ].map((stat) => (
-                    <div key={stat.label} className="bg-[#060606] px-4 py-4 text-center">
-                        <p className="text-lg font-mono text-white tabular-nums">{stat.value}</p>
+                    <div
+                        key={stat.label}
+                        className="bg-[#060606] px-4 py-4 text-center"
+                    >
+                        <p className="text-lg font-mono text-white tabular-nums">
+                            {stat.value}
+                        </p>
                         <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
                             {stat.label}
                         </p>
@@ -119,12 +171,26 @@ export default async function DiagnosticsPage() {
 
             <div className="mt-2 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40">
                 {[
-                    { label: "Odometer", value: `${vehicle.mileage.toLocaleString()} mi` },
-                    { label: "Earliest Record", value: earliestDate ? formatDate(earliestDate) : "—" },
-                    { label: "Latest Record", value: latestDate ? formatDate(latestDate) : "—" },
+                    {
+                        label: "Odometer",
+                        value: `${vehicle.mileage.toLocaleString()} mi`,
+                    },
+                    {
+                        label: "Earliest Record",
+                        value: earliestDate ? formatDate(earliestDate) : "—",
+                    },
+                    {
+                        label: "Latest Record",
+                        value: latestDate ? formatDate(latestDate) : "—",
+                    },
                 ].map((stat) => (
-                    <div key={stat.label} className="bg-[#060606] px-4 py-3 text-center">
-                        <p className="text-sm font-mono text-white tabular-nums">{stat.value}</p>
+                    <div
+                        key={stat.label}
+                        className="bg-[#060606] px-4 py-3 text-center"
+                    >
+                        <p className="text-sm font-mono text-white tabular-nums">
+                            {stat.value}
+                        </p>
                         <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
                             {stat.label}
                         </p>
@@ -133,58 +199,14 @@ export default async function DiagnosticsPage() {
             </div>
 
             {/* Attention Required */}
-            {(concerns.length > 0 || recommendations.length > 0) && (
+            {attentionNotes.length > 0 && (
                 <div className="mt-10">
                     <GradientDivider label="Attention Required" />
-                    <div className="mt-6 space-y-3">
-                        {concerns.map((note) => (
-                            <div
-                                key={note.id}
-                                className="rounded-xl border border-red-900/30 bg-red-500/[0.03] px-4 py-3"
-                            >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-red-400/80">
-                                        Concern
-                                    </span>
-                                    <span className="text-[10px] font-mono text-neutral-500">
-                                        {formatDate(note.serviceRecord.serviceDate)}
-                                        {note.serviceRecord.mileage && (
-                                            <> &middot; {note.serviceRecord.mileage.toLocaleString()} mi</>
-                                        )}
-                                        {note.serviceRecord.shop && (
-                                            <> &middot; {note.serviceRecord.shop}</>
-                                        )}
-                                    </span>
-                                </div>
-                                <p className="text-xs font-mono text-neutral-300">{note.title}</p>
-                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
-                                    {note.content}
-                                </p>
-                            </div>
-                        ))}
-
-                        {recommendations.map((note) => (
-                            <div
-                                key={note.id}
-                                className="rounded-xl border border-amber-900/30 bg-amber-500/[0.03] px-4 py-3"
-                            >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-amber-400/80">
-                                        Recommendation
-                                    </span>
-                                    <span className="text-[10px] font-mono text-neutral-500">
-                                        {formatDate(note.serviceRecord.serviceDate)}
-                                        {note.serviceRecord.mileage && (
-                                            <> &middot; {note.serviceRecord.mileage.toLocaleString()} mi</>
-                                        )}
-                                    </span>
-                                </div>
-                                <p className="text-xs font-mono text-neutral-300">{note.title}</p>
-                                <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
-                                    {note.content}
-                                </p>
-                            </div>
-                        ))}
+                    <div className="mt-6">
+                        <AttentionSection
+                            notes={attentionNotes}
+                            serviceRecords={serviceRecordOptions}
+                        />
                     </div>
                 </div>
             )}
@@ -214,7 +236,9 @@ export default async function DiagnosticsPage() {
                             >
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <p className="text-xs font-mono text-white">{c.name}</p>
+                                        <p className="text-xs font-mono text-white">
+                                            {c.name}
+                                        </p>
                                         <div className="flex items-center gap-3 mt-0.5">
                                             <span className="text-[9px] font-mono tracking-wider uppercase text-neutral-700">
                                                 {c.category}
@@ -224,7 +248,8 @@ export default async function DiagnosticsPage() {
                                             </span>
                                             {c.totalCost > 0 && (
                                                 <span className="text-[9px] font-mono text-neutral-600">
-                                                    ${c.totalCost.toFixed(0)} total
+                                                    ${c.totalCost.toFixed(0)}{" "}
+                                                    total
                                                 </span>
                                             )}
                                         </div>
@@ -237,14 +262,18 @@ export default async function DiagnosticsPage() {
                                         )}
                                         <div className="flex items-center gap-2 mt-0.5 justify-end">
                                             {c.milesSince != null && (
-                                                <span className={`text-[10px] font-mono tabular-nums ${
-                                                    c.milesSince > 30000
-                                                        ? "text-red-400/80"
-                                                        : c.milesSince > 15000
-                                                          ? "text-amber-400/80"
-                                                          : "text-neutral-600"
-                                                }`}>
-                                                    {c.milesSince.toLocaleString()} mi ago
+                                                <span
+                                                    className={`text-[10px] font-mono tabular-nums ${
+                                                        c.milesSince > 30000
+                                                            ? "text-red-400/80"
+                                                            : c.milesSince >
+                                                                15000
+                                                              ? "text-amber-400/80"
+                                                              : "text-neutral-600"
+                                                    }`}
+                                                >
+                                                    {c.milesSince.toLocaleString()}{" "}
+                                                    mi ago
                                                 </span>
                                             )}
                                             {c.daysSince != null && (
@@ -282,13 +311,22 @@ export default async function DiagnosticsPage() {
                                         Measurement
                                     </span>
                                     <span className="text-[10px] font-mono text-neutral-500">
-                                        {formatDate(note.serviceRecord.serviceDate)}
+                                        {formatDate(
+                                            note.serviceRecord.serviceDate,
+                                        )}
                                         {note.serviceRecord.mileage && (
-                                            <> &middot; {note.serviceRecord.mileage.toLocaleString()} mi</>
+                                            <>
+                                                {" "}
+                                                &middot;{" "}
+                                                {note.serviceRecord.mileage.toLocaleString()}{" "}
+                                                mi
+                                            </>
                                         )}
                                     </span>
                                 </div>
-                                <p className="text-xs font-mono text-neutral-300">{note.title}</p>
+                                <p className="text-xs font-mono text-neutral-300">
+                                    {note.title}
+                                </p>
                                 <p className="text-[11px] leading-relaxed text-neutral-500 mt-1 whitespace-pre-line">
                                     {note.content}
                                 </p>
