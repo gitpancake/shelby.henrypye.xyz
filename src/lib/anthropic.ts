@@ -59,7 +59,7 @@ Component normalization rules:
 - If mileage is not listed for a record, set to null
 - If a date cannot be determined precisely, use the first of the month
 - Costs should be numbers (no currency symbols).
-- For service invoices: use the ACTUAL CHARGED price for each line item as shown on the invoice. If the invoice shows a total/balance due but individual line items don't have separate prices, put the total on the first item and null on the rest. The sum of all line item costs should equal the invoice total or balance due (including tax, shop supplies, environmental fees, etc.). Do NOT exclude tax — use the amounts the customer actually pays.
+- For service invoices: extract the cost for each line item as shown on the invoice. IMPORTANT: if the invoice has tax, shop supplies, environmental fees, or other charges that bring the total above the sum of line items, add a final line item called "Tax & Fees" with componentName "Tax & Fees", componentCategory "Other", and the remaining difference as its cost. The sum of ALL line item costs MUST equal the invoice total / balance due / amount charged. Never undercount — verify your sum matches the invoice bottom line.
 - If cost is for the whole service and can't be split per item, put total on first item and null on rest.
 
 Parts purchase receipt rules:
