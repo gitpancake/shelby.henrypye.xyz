@@ -61,19 +61,65 @@ export async function POST(
                     where: { documentId: doc.id },
                 });
 
-                // Insert fresh extraction results
+                // Insert or overwrite extraction results
                 for (const record of result.records) {
-                    const serviceRecord = await tx.shelbyServiceRecord.create({
-                        data: {
-                            vehicleId: doc.vehicleId,
-                            documentId: doc.id,
-                            serviceDate: new Date(record.serviceDate),
-                            mileage: record.mileage,
-                            shop: record.shop,
-                            currency: record.currency || "USD",
-                            notes: record.notes,
-                        },
-                    });
+                    const extractedDate = new Date(record.serviceDate);
+                    let serviceRecord;
+
+                    // Try to find an existing record with same date + shop from a different document
+                    let existingMatch = null;
+                    if (record.shop) {
+                        const candidates =
+                            await tx.shelbyServiceRecord.findMany({
+                                where: {
+                                    vehicleId: doc.vehicleId,
+                                    serviceDate: extractedDate,
+                                    documentId: { not: doc.id },
+                                },
+                                select: { id: true, shop: true },
+                            });
+
+                        existingMatch =
+                            candidates.find(
+                                (c) =>
+                                    c.shop?.trim().toLowerCase() ===
+                                    record.shop!.trim().toLowerCase(),
+                            ) ?? null;
+                    }
+
+                    if (existingMatch) {
+                        // Overwrite: delete old notes + line items, update the record
+                        await tx.shelbyNote.deleteMany({
+                            where: { serviceRecordId: existingMatch.id },
+                        });
+                        await tx.shelbyServiceLineItem.deleteMany({
+                            where: { serviceRecordId: existingMatch.id },
+                        });
+
+                        serviceRecord = await tx.shelbyServiceRecord.update({
+                            where: { id: existingMatch.id },
+                            data: {
+                                documentId: doc.id,
+                                mileage: record.mileage,
+                                shop: record.shop,
+                                currency: record.currency || "USD",
+                                notes: record.notes,
+                            },
+                        });
+                    } else {
+                        // Create new record
+                        serviceRecord = await tx.shelbyServiceRecord.create({
+                            data: {
+                                vehicleId: doc.vehicleId,
+                                documentId: doc.id,
+                                serviceDate: extractedDate,
+                                mileage: record.mileage,
+                                shop: record.shop,
+                                currency: record.currency || "USD",
+                                notes: record.notes,
+                            },
+                        });
+                    }
 
                     if (record.serviceNotes) {
                         for (const note of record.serviceNotes) {
