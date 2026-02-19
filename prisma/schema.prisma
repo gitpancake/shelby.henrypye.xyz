@@ -119,9 +119,30 @@ model ShelbyServiceRecord {
   shop        String?
   notes       String?
   lineItems   ShelbyServiceLineItem[]
+  serviceNotes ShelbyNote[]
   createdAt   DateTime                @default(now())
 
   @@map("shelby_service_record")
+}
+
+model ShelbyNote {
+  id              String              @id @default(cuid())
+  serviceRecordId String
+  serviceRecord   ShelbyServiceRecord @relation(fields: [serviceRecordId], references: [id])
+  type            NoteType
+  title           String
+  content         String
+  createdAt       DateTime            @default(now())
+
+  @@map("shelby_note")
+}
+
+enum NoteType {
+  INSPECTION
+  MEASUREMENT
+  RECOMMENDATION
+  CONCERN
+  OBSERVATION
 }
 
 model ShelbyServiceLineItem {

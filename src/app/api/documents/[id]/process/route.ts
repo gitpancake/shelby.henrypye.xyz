@@ -47,6 +47,19 @@ export async function POST(
                         },
                     });
 
+                    if (record.serviceNotes) {
+                        for (const note of record.serviceNotes) {
+                            await tx.shelbyNote.create({
+                                data: {
+                                    serviceRecordId: serviceRecord.id,
+                                    type: note.type,
+                                    title: note.title,
+                                    content: note.content,
+                                },
+                            });
+                        }
+                    }
+
                     for (const item of record.lineItems) {
                         const component = await tx.shelbyComponent.upsert({
                             where: {
