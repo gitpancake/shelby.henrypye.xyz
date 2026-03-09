@@ -57,7 +57,7 @@ export function ComponentActions({
         return (
             <button
                 onClick={() => setShowActions(true)}
-                className="text-[9px] font-mono text-neutral-700 hover:text-neutral-400 transition-colors"
+                className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
             >
                 ...
             </button>
@@ -84,7 +84,7 @@ export function ComponentActions({
                     </button>
                     <button
                         onClick={() => setShowActions(false)}
-                        className="text-[9px] font-mono text-neutral-700 hover:text-neutral-400 transition-colors"
+                        className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Cancel
                     </button>
@@ -96,7 +96,7 @@ export function ComponentActions({
                             if (e.target.value) handleMerge(e.target.value);
                         }}
                         disabled={loading}
-                        className="rounded border border-neutral-800/60 bg-[#060606] px-2 py-1 font-mono text-[10px] text-white"
+                        className="rounded border border-border bg-background px-2 py-1 font-mono text-[10px] text-foreground"
                         defaultValue=""
                     >
                         <option value="" disabled>
@@ -110,7 +110,7 @@ export function ComponentActions({
                     </select>
                     <button
                         onClick={() => setMerging(false)}
-                        className="text-[9px] font-mono text-neutral-700 hover:text-neutral-400 transition-colors"
+                        className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Cancel
                     </button>

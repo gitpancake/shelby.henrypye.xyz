@@ -47,7 +47,7 @@ export default async function ServiceLogPage() {
 
             <div className="mt-4 space-y-4">
                 {records.length === 0 && (
-                    <p className="text-center text-xs font-mono text-neutral-600">
+                    <p className="text-center text-xs font-mono text-muted-foreground">
                         No service records yet. Upload documents or log a
                         service manually.
                     </p>
@@ -74,13 +74,13 @@ export default async function ServiceLogPage() {
                     return (
                         <div
                             key={record.id}
-                            className="rounded-xl border border-neutral-800/60 bg-white/[0.01] overflow-hidden"
+                            className="rounded-xl border border-border bg-muted/30 overflow-hidden"
                         >
                             {/* Header */}
                             <div className="px-4 pt-4 pb-3 flex items-start justify-between">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-lg font-mono text-white tabular-nums">
+                                        <p className="text-lg font-mono text-foreground tabular-nums">
                                             {formatted}
                                         </p>
                                         {!record.serviceDate &&
@@ -93,20 +93,20 @@ export default async function ServiceLogPage() {
                                     <div className="flex items-center gap-3 mt-0.5">
                                         {record.mileage &&
                                             record.serviceDate && (
-                                                <span className="text-[10px] font-mono tracking-wider text-neutral-500">
+                                                <span className="text-[10px] font-mono tracking-wider text-muted-foreground">
                                                     {record.mileage.toLocaleString()}{" "}
                                                     MI
                                                 </span>
                                             )}
                                         {record.shop && (
-                                            <span className="text-[10px] font-mono tracking-wider text-neutral-500">
+                                            <span className="text-[10px] font-mono tracking-wider text-muted-foreground">
                                                 {record.shop}
                                             </span>
                                         )}
                                     </div>
                                 </div>
                                 {totalCost > 0 && (
-                                    <span className="text-sm font-mono text-neutral-400">
+                                    <span className="text-sm font-mono text-muted-foreground">
                                         {record.currency === "CAD"
                                             ? "CA$"
                                             : "$"}
@@ -117,25 +117,25 @@ export default async function ServiceLogPage() {
 
                             {/* Line items */}
                             {record.lineItems.length > 0 && (
-                                <div className="border-t border-neutral-800/40 divide-y divide-neutral-800/30">
+                                <div className="border-t border-border divide-y divide-border">
                                     {record.lineItems.map((li) => (
                                         <div
                                             key={li.id}
                                             className="px-4 py-2.5 flex items-center justify-between"
                                         >
                                             <div>
-                                                <span className="text-xs font-mono text-neutral-300">
+                                                <span className="text-xs font-mono text-foreground">
                                                     {li.component.name}
                                                 </span>
                                                 {li.description !==
                                                     li.component.name && (
-                                                    <span className="text-[10px] text-neutral-600 ml-2">
+                                                    <span className="text-[10px] text-muted-foreground ml-2">
                                                         {li.description}
                                                     </span>
                                                 )}
                                             </div>
                                             {li.cost != null && li.cost > 0 && (
-                                                <span className="text-[10px] font-mono text-neutral-500">
+                                                <span className="text-[10px] font-mono text-muted-foreground">
                                                     {record.currency === "CAD"
                                                         ? "CA$"
                                                         : "$"}
@@ -149,7 +149,7 @@ export default async function ServiceLogPage() {
 
                             {/* Notes */}
                             {record.serviceNotes.length > 0 && (
-                                <div className="border-t border-neutral-800/40 px-4 py-3 space-y-3">
+                                <div className="border-t border-border px-4 py-3 space-y-3">
                                     {record.serviceNotes.map((note) => {
                                         const style =
                                             NOTE_STYLES[note.type] ??
@@ -162,11 +162,11 @@ export default async function ServiceLogPage() {
                                                     >
                                                         {style.label}
                                                     </span>
-                                                    <span className="text-[10px] font-mono text-neutral-400">
+                                                    <span className="text-[10px] font-mono text-muted-foreground">
                                                         {note.title}
                                                     </span>
                                                 </div>
-                                                <p className="text-[11px] leading-relaxed text-neutral-500 whitespace-pre-line">
+                                                <p className="text-[11px] leading-relaxed text-muted-foreground whitespace-pre-line">
                                                     {note.content}
                                                 </p>
                                             </div>
@@ -176,8 +176,8 @@ export default async function ServiceLogPage() {
                             )}
 
                             {/* Footer */}
-                            <div className="px-4 py-2 border-t border-neutral-800/40 bg-white/[0.01] flex items-center justify-between">
-                                <span className="text-[9px] font-mono text-neutral-700 tracking-wider">
+                            <div className="px-4 py-2 border-t border-border bg-muted/30 flex items-center justify-between">
+                                <span className="text-[9px] font-mono text-muted-foreground tracking-wider">
                                     {record.document
                                         ? `Source: ${record.document.originalFilename}`
                                         : "Manual entry"}

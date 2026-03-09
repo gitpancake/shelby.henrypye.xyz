@@ -38,13 +38,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] px-4">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Shelby
           </h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Sign in to continue
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="username"
-              className="block text-xs font-medium text-neutral-400 mb-1.5"
+              className="block text-xs font-medium text-muted-foreground mb-1.5"
             >
               Username
             </label>
@@ -65,7 +65,7 @@ export default function LoginPage() {
               required
               autoFocus
               autoComplete="username"
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
               placeholder="Enter username"
             />
           </div>
@@ -73,7 +73,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-xs font-medium text-neutral-400 mb-1.5"
+              className="block text-xs font-medium text-muted-foreground mb-1.5"
             >
               Password
             </label>
@@ -84,7 +84,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
               placeholder="Enter password"
             />
           </div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>

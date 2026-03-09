@@ -73,7 +73,7 @@ export default async function MaintenancePage() {
 
             <div className="mt-8 space-y-8">
                 {categories.length === 0 && (
-                    <p className="text-center text-xs font-mono text-neutral-600">
+                    <p className="text-center text-xs font-mono text-muted-foreground">
                         No tracked components yet. Upload and process documents
                         to populate.
                     </p>
@@ -81,22 +81,22 @@ export default async function MaintenancePage() {
 
                 {categories.map((category) => (
                     <div key={category}>
-                        <h2 className="text-[10px] font-mono tracking-[0.3em] text-neutral-500 uppercase mb-3">
+                        <h2 className="text-[10px] font-mono tracking-[0.3em] text-muted-foreground uppercase mb-3">
                             {category}
                         </h2>
 
-                        <div className="rounded-xl border border-neutral-800/60 bg-white/[0.01] divide-y divide-neutral-800/40">
+                        <div className="rounded-xl border border-border bg-muted/30 divide-y divide-border">
                             {grouped[category].map((comp) => (
                                 <div
                                     key={comp.id}
                                     className="px-4 py-3 flex items-center justify-between"
                                 >
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-mono text-white">
+                                        <p className="text-sm font-mono text-foreground">
                                             {comp.name}
                                         </p>
                                         <div className="flex items-center gap-3 mt-0.5">
-                                            <span className="text-[10px] font-mono text-neutral-600">
+                                            <span className="text-[10px] font-mono text-muted-foreground">
                                                 {comp.timesServiced}x serviced
                                             </span>
                                             <ComponentActions
@@ -107,12 +107,12 @@ export default async function MaintenancePage() {
                                     </div>
                                     <div className="text-right shrink-0">
                                         {comp.lastDate && (
-                                            <p className="text-xs font-mono text-neutral-400">
+                                            <p className="text-xs font-mono text-muted-foreground">
                                                 {comp.lastDate}
                                             </p>
                                         )}
                                         {comp.lastMileage && (
-                                            <p className="text-[10px] font-mono text-neutral-600">
+                                            <p className="text-[10px] font-mono text-muted-foreground">
                                                 {comp.lastMileage.toLocaleString()}{" "}
                                                 mi
                                             </p>

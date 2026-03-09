@@ -34,8 +34,8 @@ function ComponentCard({ component }: { component: ComponentData }) {
     const [expanded, setExpanded] = useState(false);
     const c = component;
 
-    let borderClass = "border-neutral-800/60";
-    let bgClass = "bg-white/[0.01]";
+    let borderClass = "border-border";
+    let bgClass = "bg-muted/30";
     if (c.milesSince != null) {
         if (c.milesSince > 30000) {
             borderClass = "border-red-900/30";
@@ -53,21 +53,21 @@ function ComponentCard({ component }: { component: ComponentData }) {
             <div className="px-4 py-3">
                 <div className="flex items-start justify-between">
                     <div>
-                        <p className="text-xs font-mono text-white">{c.name}</p>
+                        <p className="text-xs font-mono text-foreground">{c.name}</p>
                         <div className="flex items-center gap-3 mt-0.5">
-                            <span className="text-[9px] font-mono tracking-wider uppercase text-neutral-700">
+                            <span className="text-[9px] font-mono tracking-wider uppercase text-muted-foreground">
                                 {c.category}
                             </span>
                             <button
                                 type="button"
                                 onClick={() => setExpanded(!expanded)}
-                                className="text-[9px] font-mono text-neutral-600 hover:text-neutral-400 transition-colors"
+                                className="text-[9px] font-mono text-muted-foreground hover:text-muted-foreground transition-colors"
                             >
                                 {c.timesServiced}x serviced{" "}
                                 {expanded ? "▾" : "▸"}
                             </button>
                             {c.totalCost > 0 && (
-                                <span className="text-[9px] font-mono text-neutral-600">
+                                <span className="text-[9px] font-mono text-muted-foreground">
                                     ${c.totalCost.toFixed(0)} total
                                 </span>
                             )}
@@ -75,7 +75,7 @@ function ComponentCard({ component }: { component: ComponentData }) {
                     </div>
                     <div className="text-right">
                         {c.lastDate && (
-                            <p className="text-[10px] font-mono text-neutral-500">
+                            <p className="text-[10px] font-mono text-muted-foreground">
                                 {formatDate(c.lastDate)}
                             </p>
                         )}
@@ -87,14 +87,14 @@ function ComponentCard({ component }: { component: ComponentData }) {
                                             ? "text-red-400/80"
                                             : c.milesSince > 15000
                                               ? "text-amber-400/80"
-                                              : "text-neutral-600"
+                                              : "text-muted-foreground"
                                     }`}
                                 >
                                     {c.milesSince.toLocaleString()} mi ago
                                 </span>
                             )}
                             {c.daysSince != null && (
-                                <span className="text-[10px] font-mono text-neutral-700 tabular-nums">
+                                <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
                                     {c.daysSince}d
                                 </span>
                             )}
@@ -105,37 +105,37 @@ function ComponentCard({ component }: { component: ComponentData }) {
 
             {/* Service History */}
             {expanded && c.serviceHistory.length > 0 && (
-                <div className="border-t border-neutral-800/40 divide-y divide-neutral-800/30">
+                <div className="border-t border-border divide-y divide-border">
                     {c.serviceHistory.map((entry, i) => (
                         <div
                             key={i}
                             className="px-4 py-2 flex items-center justify-between"
                         >
                             <div>
-                                <span className="text-[10px] font-mono text-neutral-400">
+                                <span className="text-[10px] font-mono text-muted-foreground">
                                     {entry.date
                                         ? formatDate(entry.date)
                                         : "Unknown date"}
                                 </span>
                                 {entry.shop && (
-                                    <span className="text-[10px] font-mono text-neutral-600 ml-2">
+                                    <span className="text-[10px] font-mono text-muted-foreground ml-2">
                                         {entry.shop}
                                     </span>
                                 )}
                                 {entry.description && (
-                                    <span className="text-[10px] font-mono text-neutral-700 ml-2">
+                                    <span className="text-[10px] font-mono text-muted-foreground ml-2">
                                         {entry.description}
                                     </span>
                                 )}
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
                                 {entry.mileage != null && (
-                                    <span className="text-[10px] font-mono text-neutral-600 tabular-nums">
+                                    <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
                                         {entry.mileage.toLocaleString()} mi
                                     </span>
                                 )}
                                 {entry.cost != null && entry.cost > 0 && (
-                                    <span className="text-[10px] font-mono text-neutral-600 tabular-nums">
+                                    <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
                                         ${entry.cost.toFixed(2)}
                                     </span>
                                 )}
@@ -155,7 +155,7 @@ export function ComponentHealthSection({
 }) {
     if (components.length === 0) {
         return (
-            <p className="text-center text-xs font-mono text-neutral-600">
+            <p className="text-center text-xs font-mono text-muted-foreground">
                 No components tracked yet
             </p>
         );

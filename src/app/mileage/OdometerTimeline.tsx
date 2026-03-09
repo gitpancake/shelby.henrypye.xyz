@@ -9,7 +9,7 @@ interface OdometerEntry {
 export function OdometerTimeline({ entries }: { entries: OdometerEntry[] }) {
     if (entries.length === 0) {
         return (
-            <p className="text-center text-xs font-mono text-neutral-600">
+            <p className="text-center text-xs font-mono text-muted-foreground">
                 No odometer readings yet
             </p>
         );
@@ -32,26 +32,26 @@ export function OdometerTimeline({ entries }: { entries: OdometerEntry[] }) {
                 return (
                     <div
                         key={`${entry.date}-${entry.mileage}`}
-                        className="rounded-xl border border-neutral-800/60 bg-white/[0.01] px-4 py-3 flex items-center justify-between"
+                        className="rounded-xl border border-border bg-muted/30 px-4 py-3 flex items-center justify-between"
                     >
                         <div>
-                            <p className="text-sm font-mono text-white tabular-nums">
+                            <p className="text-sm font-mono text-foreground tabular-nums">
                                 {entry.mileage.toLocaleString()}
-                                <span className="text-[10px] text-neutral-600 ml-1.5 tracking-wider">
+                                <span className="text-[10px] text-muted-foreground ml-1.5 tracking-wider">
                                     MI
                                 </span>
                             </p>
-                            <p className="text-[10px] font-mono text-neutral-500 mt-0.5">
+                            <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
                                 {formatted}
                             </p>
                         </div>
                         <div className="text-right">
                             {delta !== null && delta > 0 && (
-                                <p className="text-[10px] font-mono text-neutral-600 tabular-nums">
+                                <p className="text-[10px] font-mono text-muted-foreground tabular-nums">
                                     +{delta.toLocaleString()} mi
                                 </p>
                             )}
-                            <p className="text-[9px] font-mono text-neutral-700 mt-0.5">
+                            <p className="text-[9px] font-mono text-muted-foreground mt-0.5">
                                 {entry.source}
                             </p>
                         </div>

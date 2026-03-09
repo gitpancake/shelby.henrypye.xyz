@@ -125,19 +125,19 @@ export default async function DiagnosticsPage() {
             <GradientDivider label="Diagnostics" />
 
             {/* Summary Stats */}
-            <div className="mt-8 grid grid-cols-2 gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40">
+            <div className="mt-8 grid grid-cols-2 gap-px rounded-xl overflow-hidden border border-border bg-border">
                 {[
                     { label: "Records", value: totalRecords.toString() },
                     { label: "Components", value: totalComponents.toString() },
                 ].map((stat) => (
                     <div
                         key={stat.label}
-                        className="bg-[#060606] px-4 py-4 text-center"
+                        className="bg-background px-4 py-4 text-center"
                     >
-                        <p className="text-lg font-mono text-white tabular-nums">
+                        <p className="text-lg font-mono text-foreground tabular-nums">
                             {stat.value}
                         </p>
-                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
+                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mt-1">
                             {stat.label}
                         </p>
                     </div>
@@ -145,36 +145,36 @@ export default async function DiagnosticsPage() {
             </div>
 
             <div
-                className={`mt-2 grid gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40 ${Object.keys(spentByCurrency).length === 2 ? "grid-cols-2" : "grid-cols-1"}`}
+                className={`mt-2 grid gap-px rounded-xl overflow-hidden border border-border bg-border ${Object.keys(spentByCurrency).length === 2 ? "grid-cols-2" : "grid-cols-1"}`}
             >
                 {Object.keys(spentByCurrency).length > 0 ? (
                     Object.entries(spentByCurrency).map(([cur, amount]) => (
                         <div
                             key={cur}
-                            className="bg-[#060606] px-4 py-4 text-center"
+                            className="bg-background px-4 py-4 text-center"
                         >
-                            <p className="text-lg font-mono text-white tabular-nums">
+                            <p className="text-lg font-mono text-foreground tabular-nums">
                                 {cur === "CAD" ? "CA$" : "$"}
                                 {amount.toFixed(0)}
                             </p>
-                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mt-1">
                                 Spent ({cur})
                             </p>
                         </div>
                     ))
                 ) : (
-                    <div className="bg-[#060606] px-4 py-4 text-center">
-                        <p className="text-lg font-mono text-white tabular-nums">
+                    <div className="bg-background px-4 py-4 text-center">
+                        <p className="text-lg font-mono text-foreground tabular-nums">
                             $0
                         </p>
-                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
+                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mt-1">
                             Total Spent
                         </p>
                     </div>
                 )}
             </div>
 
-            <div className="mt-2 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-neutral-800/60 bg-neutral-800/40">
+            <div className="mt-2 grid grid-cols-3 gap-px rounded-xl overflow-hidden border border-border bg-border">
                 {[
                     {
                         label: "Odometer",
@@ -191,12 +191,12 @@ export default async function DiagnosticsPage() {
                 ].map((stat) => (
                     <div
                         key={stat.label}
-                        className="bg-[#060606] px-4 py-3 text-center"
+                        className="bg-background px-4 py-3 text-center"
                     >
-                        <p className="text-sm font-mono text-white tabular-nums">
+                        <p className="text-sm font-mono text-foreground tabular-nums">
                             {stat.value}
                         </p>
-                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mt-1">
+                        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mt-1">
                             {stat.label}
                         </p>
                     </div>
@@ -232,7 +232,7 @@ export default async function DiagnosticsPage() {
                                             {item.component}
                                         </span>
                                     )}
-                                    <p className="text-[11px] leading-relaxed text-neutral-400 mt-1.5">
+                                    <p className="text-[11px] leading-relaxed text-muted-foreground mt-1.5">
                                         {item.detail}
                                     </p>
                                 </div>
@@ -268,7 +268,7 @@ export default async function DiagnosticsPage() {
                                             {item.component}
                                         </span>
                                     )}
-                                    <p className="text-[11px] leading-relaxed text-neutral-400 mt-1.5">
+                                    <p className="text-[11px] leading-relaxed text-muted-foreground mt-1.5">
                                         {item.detail}
                                     </p>
                                 </div>
@@ -279,18 +279,18 @@ export default async function DiagnosticsPage() {
                     {/* Monitoring */}
                     {report.monitoring.length > 0 && (
                         <div className="space-y-3">
-                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-500">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground">
                                 Monitoring
                             </p>
                             {report.monitoring.map((item, i) => (
                                 <div
                                     key={i}
-                                    className="rounded-xl border border-neutral-800/60 bg-neutral-500/[0.03] px-4 py-3"
+                                    className="rounded-xl border border-border bg-neutral-500/[0.03] px-4 py-3"
                                 >
-                                    <p className="text-xs font-mono text-neutral-300">
+                                    <p className="text-xs font-mono text-foreground">
                                         {item.title}
                                     </p>
-                                    <p className="text-[11px] leading-relaxed text-neutral-500 mt-1.5">
+                                    <p className="text-[11px] leading-relaxed text-muted-foreground mt-1.5">
                                         {item.detail}
                                     </p>
                                 </div>
@@ -305,7 +305,7 @@ export default async function DiagnosticsPage() {
                                 Service Provider Notes
                             </p>
                             <div className="rounded-xl border border-cyan-900/20 bg-cyan-500/[0.02] px-4 py-3">
-                                <p className="text-[11px] leading-relaxed text-neutral-300 whitespace-pre-line">
+                                <p className="text-[11px] leading-relaxed text-foreground whitespace-pre-line">
                                     {report.serviceProviderNotes}
                                 </p>
                             </div>
@@ -315,11 +315,11 @@ export default async function DiagnosticsPage() {
                     {/* Summary */}
                     {report.summary && (
                         <div className="space-y-3">
-                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-500">
+                            <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground">
                                 Overall Assessment
                             </p>
-                            <div className="rounded-xl border border-neutral-800/60 bg-[#060606] px-4 py-3">
-                                <p className="text-[11px] leading-relaxed text-neutral-400 whitespace-pre-line">
+                            <div className="rounded-xl border border-border bg-background px-4 py-3">
+                                <p className="text-[11px] leading-relaxed text-muted-foreground whitespace-pre-line">
                                     {report.summary}
                                 </p>
                             </div>
@@ -327,7 +327,7 @@ export default async function DiagnosticsPage() {
                     )}
 
                     {/* Report metadata */}
-                    <p className="text-[9px] font-mono text-neutral-600 text-center pt-2">
+                    <p className="text-[9px] font-mono text-muted-foreground text-center pt-2">
                         Generated {formatDate(latestReport.createdAt)} at{" "}
                         {latestReport.mileage.toLocaleString()} mi
                     </p>

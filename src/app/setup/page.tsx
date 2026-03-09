@@ -43,13 +43,13 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] px-4">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Add Your Vehicle
           </h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             We&apos;ll look up the details from your VIN
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function SetupPage() {
           <div>
             <label
               htmlFor="vin"
-              className="block text-xs font-medium text-neutral-400 mb-1.5"
+              className="block text-xs font-medium text-muted-foreground mb-1.5"
             >
               VIN
             </label>
@@ -70,7 +70,7 @@ export default function SetupPage() {
               required
               autoFocus
               maxLength={17}
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 uppercase font-mono tracking-wider"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring uppercase font-mono tracking-wider"
               placeholder="e.g. JT3HN86R0Y0231567"
             />
           </div>
@@ -78,7 +78,7 @@ export default function SetupPage() {
           <div>
             <label
               htmlFor="plate"
-              className="block text-xs font-medium text-neutral-400 mb-1.5"
+              className="block text-xs font-medium text-muted-foreground mb-1.5"
             >
               License Plate
             </label>
@@ -88,7 +88,7 @@ export default function SetupPage() {
               value={licensePlate}
               onChange={(e) => setLicensePlate(e.target.value)}
               required
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 uppercase font-mono tracking-wider"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring uppercase font-mono tracking-wider"
               placeholder="e.g. 8ABC123"
             />
           </div>
@@ -96,7 +96,7 @@ export default function SetupPage() {
           <div>
             <label
               htmlFor="mileage"
-              className="block text-xs font-medium text-neutral-400 mb-1.5"
+              className="block text-xs font-medium text-muted-foreground mb-1.5"
             >
               Current Mileage
             </label>
@@ -107,7 +107,7 @@ export default function SetupPage() {
               onChange={(e) => setMileage(e.target.value)}
               required
               min={0}
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-sm text-white placeholder-neutral-600 outline-none transition-colors focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 font-mono"
+              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring font-mono"
               placeholder="e.g. 185000"
             />
           </div>
@@ -117,7 +117,7 @@ export default function SetupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Looking up VIN..." : "Add Vehicle"}
           </button>

@@ -48,14 +48,14 @@ export default async function HomePage() {
             <div className="mb-10">
                 <GradientDivider label="Vehicle System Online" />
 
-                <h1 className="text-3xl font-light tracking-tight text-white text-center mt-4">
+                <h1 className="text-3xl font-light tracking-tight text-foreground text-center mt-4">
                     {vehicle.year}{" "}
                     <span className="font-semibold">{vehicle.make}</span>{" "}
                     {vehicle.model}
                 </h1>
 
                 {vehicle.trim && (
-                    <p className="text-center mt-1 text-xs font-mono tracking-[0.2em] text-neutral-500 uppercase">
+                    <p className="text-center mt-1 text-xs font-mono tracking-[0.2em] text-muted-foreground uppercase">
                         {vehicle.trim}
                     </p>
                 )}
@@ -63,28 +63,28 @@ export default async function HomePage() {
 
             {/* Mileage hero */}
             <div className="relative mb-8 py-8 text-center">
-                <div className="absolute inset-0 rounded-2xl border border-neutral-800/60 bg-gradient-to-b from-white/[0.02] to-transparent" />
+                <div className="absolute inset-0 rounded-2xl border border-border bg-gradient-to-b from-muted/40 to-transparent" />
                 <div className="relative">
-                    <p className="text-[10px] font-mono tracking-[0.3em] text-neutral-600 uppercase mb-2">
+                    <p className="text-[10px] font-mono tracking-[0.3em] text-muted-foreground uppercase mb-2">
                         Odometer
                     </p>
-                    <p className="text-5xl font-extralight tracking-tight text-white font-mono tabular-nums">
+                    <p className="text-5xl font-extralight tracking-tight text-foreground font-mono tabular-nums">
                         {vehicle.mileage.toLocaleString()}
                     </p>
-                    <p className="text-xs font-mono text-neutral-600 mt-1">
+                    <p className="text-xs font-mono text-muted-foreground mt-1">
                         miles
                     </p>
                 </div>
             </div>
 
             {/* Spec grid */}
-            <div className="grid grid-cols-2 gap-px bg-neutral-800/40 rounded-xl overflow-hidden mb-8">
+            <div className="grid grid-cols-2 gap-px bg-border rounded-xl overflow-hidden mb-8">
                 {specs.map((s) => (
-                    <div key={s.label} className="bg-[#060606] p-4">
-                        <p className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase mb-1.5">
+                    <div key={s.label} className="bg-background p-4">
+                        <p className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase mb-1.5">
                             {s.label}
                         </p>
-                        <p className="text-sm font-mono text-white leading-snug">
+                        <p className="text-sm font-mono text-foreground leading-snug">
                             {s.value}
                         </p>
                     </div>
@@ -92,39 +92,39 @@ export default async function HomePage() {
             </div>
 
             {/* Identity block */}
-            <div className="rounded-xl border border-neutral-800/60 bg-white/[0.01] divide-y divide-neutral-800/60 mb-8">
+            <div className="rounded-xl border border-border bg-muted/30 divide-y divide-border mb-8">
                 <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase">
+                    <span className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase">
                         VIN
                     </span>
-                    <span className="text-xs font-mono text-neutral-300 tracking-wider">
+                    <span className="text-xs font-mono text-foreground tracking-wider">
                         {vehicle.vin}
                     </span>
                 </div>
                 <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase">
+                    <span className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase">
                         Plate
                     </span>
-                    <span className="text-xs font-mono text-neutral-300 tracking-wider">
+                    <span className="text-xs font-mono text-foreground tracking-wider">
                         {vehicle.licensePlate}
                     </span>
                 </div>
                 {vehicle.bodyClass && (
                     <div className="flex items-center justify-between px-4 py-3">
-                        <span className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase">
+                        <span className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase">
                             Class
                         </span>
-                        <span className="text-xs font-mono text-neutral-300">
+                        <span className="text-xs font-mono text-foreground">
                             {vehicle.bodyClass.split("/")[0].trim()}
                         </span>
                     </div>
                 )}
                 {vehicle.plantCountry && (
                     <div className="flex items-center justify-between px-4 py-3">
-                        <span className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase">
+                        <span className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase">
                             Origin
                         </span>
-                        <span className="text-xs font-mono text-neutral-300 tracking-wider">
+                        <span className="text-xs font-mono text-foreground tracking-wider">
                             {vehicle.plantCountry}
                         </span>
                     </div>
@@ -134,39 +134,39 @@ export default async function HomePage() {
             {/* Service summary */}
             <GradientDivider label="Service History" />
 
-            <div className="mt-6 grid grid-cols-3 gap-px bg-neutral-800/40 rounded-xl overflow-hidden">
+            <div className="mt-6 grid grid-cols-3 gap-px bg-border rounded-xl overflow-hidden">
                 <Link
                     href="/service-log"
-                    className="bg-[#060606] p-4 text-center transition-colors hover:bg-white/[0.02]"
+                    className="bg-background p-4 text-center transition-colors hover:bg-muted/40"
                 >
-                    <p className="text-2xl font-extralight font-mono text-white tabular-nums">
+                    <p className="text-2xl font-extralight font-mono text-foreground tabular-nums">
                         {recordCount}
                     </p>
-                    <p className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase mt-1">
+                    <p className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase mt-1">
                         Records
                     </p>
                 </Link>
                 <Link
                     href="/maintenance"
-                    className="bg-[#060606] p-4 text-center transition-colors hover:bg-white/[0.02]"
+                    className="bg-background p-4 text-center transition-colors hover:bg-muted/40"
                 >
-                    <p className="text-2xl font-extralight font-mono text-white tabular-nums">
+                    <p className="text-2xl font-extralight font-mono text-foreground tabular-nums">
                         {componentCount}
                     </p>
-                    <p className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase mt-1">
+                    <p className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase mt-1">
                         Components
                     </p>
                 </Link>
                 <Link
                     href="/documents"
-                    className="bg-[#060606] p-4 text-center transition-colors hover:bg-white/[0.02]"
+                    className="bg-background p-4 text-center transition-colors hover:bg-muted/40"
                 >
-                    <p className="text-[10px] font-mono tracking-[0.2em] text-neutral-600 uppercase mb-2">
+                    <p className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground uppercase mb-2">
                         Last Service
                     </p>
                     {latestRecord ? (
                         <>
-                            <p className="text-xs font-mono text-white">
+                            <p className="text-xs font-mono text-foreground">
                                 {latestRecord.serviceDate
                                     ? new Date(
                                           latestRecord.serviceDate,
@@ -177,13 +177,13 @@ export default async function HomePage() {
                                     : "Unknown date"}
                             </p>
                             {latestRecord.mileage && (
-                                <p className="text-[10px] font-mono text-neutral-600 mt-0.5">
+                                <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
                                     {latestRecord.mileage.toLocaleString()} mi
                                 </p>
                             )}
                         </>
                     ) : (
-                        <p className="text-xs font-mono text-neutral-600">--</p>
+                        <p className="text-xs font-mono text-muted-foreground">--</p>
                     )}
                 </Link>
             </div>

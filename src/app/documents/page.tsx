@@ -49,7 +49,7 @@ export default async function DocumentsPage() {
                 )}
 
                 {documents.length === 0 && (
-                    <p className="text-center text-xs font-mono text-neutral-600">
+                    <p className="text-center text-xs font-mono text-muted-foreground">
                         No documents uploaded yet
                     </p>
                 )}

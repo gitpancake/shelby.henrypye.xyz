@@ -64,16 +64,16 @@ export function DocumentUploader() {
         disabled={uploading}
         className={`w-full rounded-xl border border-dashed py-8 px-4 text-center transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
           dragging
-            ? "border-white/40 bg-white/[0.03]"
-            : "border-neutral-800 bg-white/[0.01] hover:border-neutral-700 hover:bg-white/[0.02]"
+            ? "border-foreground/40 bg-muted/50"
+            : "border-border bg-muted/30 hover:border-border hover:bg-muted/40"
         }`}
       >
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           {uploading
             ? "Uploading..."
             : "Drop a file here or click to upload"}
         </p>
-        <p className="text-[10px] font-mono text-neutral-700 mt-1">
+        <p className="text-[10px] font-mono text-muted-foreground mt-1">
           PDF, JPG, PNG
         </p>
       </button>

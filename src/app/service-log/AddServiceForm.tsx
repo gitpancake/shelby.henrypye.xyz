@@ -99,7 +99,7 @@ export function AddServiceForm() {
         return (
             <button
                 onClick={() => setOpen(true)}
-                className="w-full rounded-xl border border-dashed border-neutral-800/60 bg-transparent px-4 py-3 font-mono text-xs tracking-[0.2em] uppercase text-neutral-500 transition-all hover:border-neutral-700 hover:text-neutral-300"
+                className="w-full rounded-xl border border-dashed border-border bg-transparent px-4 py-3 font-mono text-xs tracking-[0.2em] uppercase text-muted-foreground transition-all hover:border-border hover:text-foreground"
             >
                 + Log Service
             </button>
@@ -109,22 +109,22 @@ export function AddServiceForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="rounded-xl border border-neutral-800/60 bg-white/[0.01] p-4 space-y-3"
+            className="rounded-xl border border-border bg-muted/30 p-4 space-y-3"
         >
             <div className="grid grid-cols-2 gap-3">
                 <div>
-                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                         Date
                     </label>
                     <input
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
-                        className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white [color-scheme:dark]"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground [color-scheme:dark]"
                     />
                 </div>
                 <div>
-                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                         Cost
                     </label>
                     <div className="flex gap-1.5">
@@ -135,12 +135,12 @@ export function AddServiceForm() {
                             value={cost}
                             onChange={(e) => setCost(e.target.value)}
                             placeholder="0.00"
-                            className="flex-1 rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground"
                         />
                         <select
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
-                            className="rounded-lg border border-neutral-800/60 bg-[#060606] px-2 py-2 font-mono text-xs text-white"
+                            className="rounded-lg border border-border bg-background px-2 py-2 font-mono text-xs text-foreground"
                         >
                             <option value="USD">USD</option>
                             <option value="CAD">CAD</option>
@@ -150,7 +150,7 @@ export function AddServiceForm() {
             </div>
 
             <div>
-                <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                     Description *
                 </label>
                 <input
@@ -159,13 +159,13 @@ export function AddServiceForm() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="e.g. Alternator installation"
-                    className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground"
                 />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
                 <div>
-                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                         Component *
                     </label>
                     <input
@@ -174,18 +174,18 @@ export function AddServiceForm() {
                         value={componentName}
                         onChange={(e) => setComponentName(e.target.value)}
                         placeholder="e.g. Alternator"
-                        className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground"
                     />
                 </div>
                 <div>
-                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                         Category *
                     </label>
                     <select
                         required
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground"
                     >
                         {CATEGORIES.map((cat) => (
                             <option key={cat} value={cat}>
@@ -198,7 +198,7 @@ export function AddServiceForm() {
 
             <div className="grid grid-cols-2 gap-3">
                 <div>
-                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                         Mileage
                     </label>
                     <input
@@ -207,11 +207,11 @@ export function AddServiceForm() {
                         value={mileage}
                         onChange={(e) => setMileage(e.target.value)}
                         placeholder="Odometer reading"
-                        className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground"
                     />
                 </div>
                 <div>
-                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                    <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                         Shop / Provider
                     </label>
                     <input
@@ -219,13 +219,13 @@ export function AddServiceForm() {
                         value={shop}
                         onChange={(e) => setShop(e.target.value)}
                         placeholder="e.g. Local mechanic"
-                        className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground"
                     />
                 </div>
             </div>
 
             <div>
-                <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-1">
+                <label className="block text-[9px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                     Notes
                 </label>
                 <input
@@ -233,7 +233,7 @@ export function AddServiceForm() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Any additional details"
-                    className="w-full rounded-lg border border-neutral-800/60 bg-[#060606] px-3 py-2 font-mono text-xs text-white placeholder:text-neutral-700"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground"
                 />
             </div>
 
@@ -245,7 +245,7 @@ export function AddServiceForm() {
                 <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 rounded-lg border border-neutral-800/60 bg-white/[0.03] px-4 py-2 font-mono text-xs tracking-[0.2em] uppercase text-neutral-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:opacity-50"
+                    className="flex-1 rounded-lg border border-border bg-muted/50 px-4 py-2 font-mono text-xs tracking-[0.2em] uppercase text-foreground transition-all hover:bg-muted hover:text-foreground disabled:opacity-50"
                 >
                     {saving ? "..." : "Save"}
                 </button>
@@ -255,7 +255,7 @@ export function AddServiceForm() {
                         reset();
                         setOpen(false);
                     }}
-                    className="rounded-lg border border-neutral-800/60 px-4 py-2 font-mono text-xs tracking-[0.2em] uppercase text-neutral-600 transition-all hover:text-neutral-400"
+                    className="rounded-lg border border-border px-4 py-2 font-mono text-xs tracking-[0.2em] uppercase text-muted-foreground transition-all hover:text-foreground"
                 >
                     Cancel
                 </button>

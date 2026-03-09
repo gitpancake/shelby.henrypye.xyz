@@ -31,7 +31,7 @@ export function CurrencyToggle({
         <button
             onClick={toggle}
             disabled={saving}
-            className="text-[9px] font-mono tracking-[0.2em] uppercase text-neutral-600 hover:text-neutral-400 transition-colors disabled:opacity-50"
+            className="text-[9px] font-mono tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
             title={`Switch to ${currency === "USD" ? "CAD" : "USD"}`}
         >
             {saving ? "..." : currency}

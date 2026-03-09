@@ -35,7 +35,7 @@ export function RunDiagnosticButton() {
             <button
                 onClick={handleRun}
                 disabled={running}
-                className="w-full rounded-xl border border-neutral-800/60 bg-[#060606] px-4 py-3 font-mono text-xs tracking-[0.2em] uppercase text-neutral-300 transition-all hover:border-neutral-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 font-mono text-xs tracking-[0.2em] uppercase text-foreground transition-all hover:border-border hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {running ? (
                     <span className="flex items-center justify-center gap-2">

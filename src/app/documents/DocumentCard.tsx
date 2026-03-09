@@ -75,17 +75,17 @@ export function DocumentCard({ doc }: DocumentCardProps) {
     });
 
     return (
-        <div className="rounded-xl border border-neutral-800/60 bg-white/[0.01] p-4">
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                    <p className="text-sm font-mono text-white truncate">
+                    <p className="text-sm font-mono text-foreground truncate">
                         {doc.originalFilename}
                     </p>
                     <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[10px] font-mono text-neutral-600">
+                        <span className="text-[10px] font-mono text-muted-foreground">
                             {sizeKB} KB
                         </span>
-                        <span className="text-[10px] font-mono text-neutral-600">
+                        <span className="text-[10px] font-mono text-muted-foreground">
                             {date}
                         </span>
                     </div>
@@ -98,14 +98,14 @@ export function DocumentCard({ doc }: DocumentCardProps) {
 
             {localStatus === "COMPLETED" && doc._count.serviceRecords > 0 && (
                 <div className="mt-3 flex items-center justify-between">
-                    <p className="text-[10px] font-mono text-neutral-500">
+                    <p className="text-[10px] font-mono text-muted-foreground">
                         {doc._count.serviceRecords} service record
                         {doc._count.serviceRecords !== 1 ? "s" : ""} extracted
                     </p>
                     <button
                         type="button"
                         onClick={handleProcess}
-                        className="rounded-md border border-neutral-800 px-2 py-1 text-[9px] font-mono tracking-wider uppercase text-neutral-600 transition-colors hover:bg-white/5 hover:text-neutral-400"
+                        className="rounded-md border border-border px-2 py-1 text-[9px] font-mono tracking-wider uppercase text-muted-foreground transition-colors hover:bg-muted hover:text-muted-foreground"
                     >
                         Reprocess
                     </button>
@@ -113,7 +113,7 @@ export function DocumentCard({ doc }: DocumentCardProps) {
             )}
 
             {localStatus === "PROCESSING" && (
-                <p className="text-[10px] font-mono text-neutral-500 mt-3 animate-pulse">
+                <p className="text-[10px] font-mono text-muted-foreground mt-3 animate-pulse">
                     Analyzing document with AI...
                 </p>
             )}
@@ -122,7 +122,7 @@ export function DocumentCard({ doc }: DocumentCardProps) {
                 <button
                     type="button"
                     onClick={handleProcess}
-                    className="mt-3 w-full rounded-lg bg-white/5 border border-neutral-800 px-3 py-2 text-[10px] font-mono tracking-wider uppercase text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+                    className="mt-3 w-full rounded-lg bg-muted border border-border px-3 py-2 text-[10px] font-mono tracking-wider uppercase text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                     Extract Records
                 </button>

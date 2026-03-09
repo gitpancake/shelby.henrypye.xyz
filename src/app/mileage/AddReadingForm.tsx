@@ -39,13 +39,13 @@ export function AddReadingForm() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="rounded-xl border border-neutral-800/60 bg-white/[0.01] p-4">
-            <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-neutral-600 mb-3">
+        <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-muted/30 p-4">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-3">
                 Add Reading
             </p>
             <div className="flex items-end gap-3">
                 <div className="flex-1">
-                    <label className="block text-[9px] font-mono tracking-wider uppercase text-neutral-700 mb-1">
+                    <label className="block text-[9px] font-mono tracking-wider uppercase text-muted-foreground mb-1">
                         Date
                     </label>
                     <input
@@ -53,11 +53,11 @@ export function AddReadingForm() {
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                         required
-                        className="w-full rounded-lg border border-neutral-800 bg-black/50 px-3 py-2 text-xs font-mono text-white placeholder-neutral-700 focus:border-neutral-600 focus:outline-none"
+                        className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-mono text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none"
                     />
                 </div>
                 <div className="flex-1">
-                    <label className="block text-[9px] font-mono tracking-wider uppercase text-neutral-700 mb-1">
+                    <label className="block text-[9px] font-mono tracking-wider uppercase text-muted-foreground mb-1">
                         Mileage
                     </label>
                     <input
@@ -66,13 +66,13 @@ export function AddReadingForm() {
                         onChange={(e) => setMileage(e.target.value)}
                         required
                         placeholder="0"
-                        className="w-full rounded-lg border border-neutral-800 bg-black/50 px-3 py-2 text-xs font-mono text-white placeholder-neutral-700 focus:border-neutral-600 focus:outline-none"
+                        className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-xs font-mono text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none"
                     />
                 </div>
                 <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-lg bg-white/5 border border-neutral-800 px-4 py-2 text-[10px] font-mono tracking-wider uppercase text-neutral-400 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    className="rounded-lg bg-muted border border-border px-4 py-2 text-[10px] font-mono tracking-wider uppercase text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
                 >
                     {saving ? "..." : "Add"}
                 </button>
