@@ -1,106 +1,129 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { getFirebaseAuth } from "@/lib/firebase";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const cred = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
+      const idToken = await cred.user.getIdToken();
+
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ idToken }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Invalid credentials");
-        setLoading(false);
+        setError(data.error || "Login failed");
+        setPassword("");
         return;
       }
 
       router.push("/");
       router.refresh();
     } catch {
-      setError("Something went wrong");
+      setError("Invalid credentials");
+      setPassword("");
+    } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-background">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Shelby
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to continue
-          </p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-mono text-sm font-bold tracking-tight">
+              shelby.
+            </CardTitle>
+            <CardDescription>
+              Sign in to your vehicle tracker
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoFocus
+                  autoComplete="email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-xs font-medium text-muted-foreground mb-1.5"
-            >
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoFocus
-              autoComplete="username"
-              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
-              placeholder="Enter username"
-            />
-          </div>
+              {error && (
+                <p className="text-xs text-destructive">{error}</p>
+              )}
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-xs font-medium text-muted-foreground mb-1.5"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
-              placeholder="Enter password"
-            />
-          </div>
+              {resetSent && (
+                <p className="text-xs text-positive">Password reset email sent</p>
+              )}
 
-          {error && (
-            <p className="text-sm text-red-400">{error}</p>
-          )}
+              <Button
+                type="submit"
+                disabled={loading || !email || !password}
+                className="w-full"
+              >
+                {loading ? "Signing in..." : "Sign in"}
+              </Button>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+              <button
+                type="button"
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                onClick={async () => {
+                  if (!email) {
+                    setError("Enter your email first");
+                    return;
+                  }
+                  setError("");
+                  setResetSent(false);
+                  try {
+                    await sendPasswordResetEmail(getFirebaseAuth(), email);
+                    setResetSent(true);
+                  } catch {
+                    setError("Failed to send reset email");
+                  }
+                }}
+              >
+                Forgot password?
+              </button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

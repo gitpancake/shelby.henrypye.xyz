@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SESSION_COOKIE_NAME = "shelby_session";
+const SESSION_COOKIE = "firebase-token";
 
 const PUBLIC_PATHS = ["/login", "/api/auth"];
 
@@ -11,7 +11,7 @@ export function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const session = request.cookies.get(SESSION_COOKIE_NAME);
+    const session = request.cookies.get(SESSION_COOKIE);
 
     if (!session?.value) {
         const loginUrl = new URL("/login", request.url);

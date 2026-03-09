@@ -1,55 +1,53 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { cookies } from "next/headers";
+import { adminAuth } from "./firebase-admin";
 
-export const SESSION_COOKIE_NAME = "shelby_session";
-const SECRET_SALT = "shelby-4runner-auth";
+const SESSION_COOKIE = "firebase-token";
+const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
-function getSecret(): string {
-    const password = process.env.AUTH_PASSWORD;
-    if (!password) throw new Error("AUTH_PASSWORD not set");
-    return createHmac("sha256", SECRET_SALT).update(password).digest("hex");
+export interface SessionUser {
+  uid: string;
+  email: string;
+  displayName: string | null;
+  photoURL: string | null;
 }
 
-export function createSessionToken(): string {
-    const secret = getSecret();
-    const payload = Date.now().toString();
-    const sig = createHmac("sha256", secret).update(payload).digest("hex");
-    return `${payload}.${sig}`;
+async function resolveToken(token: string): Promise<SessionUser | null> {
+  try {
+    const decoded = await adminAuth.verifyIdToken(token);
+    const userRecord = await adminAuth.getUser(decoded.uid);
+
+    return {
+      uid: decoded.uid,
+      email: userRecord.email ?? "",
+      displayName: userRecord.displayName ?? null,
+      photoURL: userRecord.photoURL ?? null,
+    };
+  } catch {
+    return null;
+  }
 }
 
-export function verifySessionToken(token: string): boolean {
-    try {
-        const secret = getSecret();
-        const [payload, sig] = token.split(".");
-        if (!payload || !sig) return false;
-        const expected = createHmac("sha256", secret)
-            .update(payload)
-            .digest("hex");
-        return timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
-    } catch {
-        return false;
-    }
+export async function getSession(): Promise<SessionUser | null> {
+  const jar = await cookies();
+  const cookieToken = jar.get(SESSION_COOKIE)?.value;
+  if (cookieToken) {
+    return resolveToken(cookieToken);
+  }
+  return null;
 }
 
-export function verifyCredentials(username: string, password: string): boolean {
-    const expectedUser = process.env.AUTH_USERNAME;
-    const expectedPass = process.env.AUTH_PASSWORD;
-    if (!expectedUser || !expectedPass) return false;
+export async function setSession(idToken: string) {
+  const jar = await cookies();
+  jar.set(SESSION_COOKIE, idToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: MAX_AGE,
+    path: "/",
+  });
+}
 
-    // Hash both sides so buffers are always the same length
-    const userHash = createHmac("sha256", SECRET_SALT)
-        .update(username)
-        .digest();
-    const expectedUserHash = createHmac("sha256", SECRET_SALT)
-        .update(expectedUser)
-        .digest();
-    const passHash = createHmac("sha256", SECRET_SALT)
-        .update(password)
-        .digest();
-    const expectedPassHash = createHmac("sha256", SECRET_SALT)
-        .update(expectedPass)
-        .digest();
-
-    const userMatch = timingSafeEqual(userHash, expectedUserHash);
-    const passMatch = timingSafeEqual(passHash, expectedPassHash);
-    return userMatch && passMatch;
+export async function clearSession() {
+  const jar = await cookies();
+  jar.delete(SESSION_COOKIE);
 }
