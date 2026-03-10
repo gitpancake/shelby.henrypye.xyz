@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { PageShell } from "@/components/PageShell";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -43,7 +44,8 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <PageShell>
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -124,5 +126,6 @@ export default function SetupPage() {
         </form>
       </div>
     </div>
+    </PageShell>
   );
 }

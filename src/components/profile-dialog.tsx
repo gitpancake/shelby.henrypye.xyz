@@ -505,7 +505,7 @@ function TeamTab() {
             value={newTeamName}
             onChange={(e) => setNewTeamName(e.target.value)}
             placeholder="Team name"
-            onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()}
+            onKeyDown={(e) => e.key === "Enter" && !creatingTeam && handleCreateTeam()}
             autoFocus
           />
           <Button size="sm" onClick={handleCreateTeam} disabled={creatingTeam || !newTeamName.trim()}>
