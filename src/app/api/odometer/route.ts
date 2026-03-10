@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 export const GET = withAuth(async (_request, { session }) => {
     const vehicle = await prisma.shelbyVehicle.findFirst({
-        where: { userId: session.uid },
+        where: { teamId: session.activeTeamId },
     });
     if (!vehicle) {
         return NextResponse.json([], { status: 200 });
@@ -60,8 +60,11 @@ export const GET = withAuth(async (_request, { session }) => {
 });
 
 export const POST = withAuth(async (request, { session }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     const vehicle = await prisma.shelbyVehicle.findFirst({
-        where: { userId: session.uid },
+        where: { teamId: session.activeTeamId },
     });
     if (!vehicle) {
         return NextResponse.json(

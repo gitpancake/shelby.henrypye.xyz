@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 const BUCKET = "shelby-documents";
 
 export const POST = withAuth(async (_request, { session }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     try {
         const vehicle = await prisma.shelbyVehicle.findFirst({
-            where: { userId: session.uid },
+            where: { teamId: session.activeTeamId },
         });
         if (!vehicle) {
             return NextResponse.json({ ok: true });

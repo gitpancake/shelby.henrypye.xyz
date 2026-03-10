@@ -12,7 +12,7 @@ export default async function HomePage() {
     if (!session) redirect("/login");
 
     const vehicle = await prisma.shelbyVehicle.findFirst({
-        where: { userId: session.uid },
+        where: { teamId: session.activeTeamId },
     });
 
     if (!vehicle) redirect("/setup");

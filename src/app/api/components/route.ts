@@ -4,7 +4,7 @@ import { withAuth } from "@/lib/auth";
 
 export const GET = withAuth(async (_request, { session }) => {
   const vehicle = await prisma.shelbyVehicle.findFirst({
-    where: { userId: session.uid },
+    where: { teamId: session.activeTeamId },
   });
   if (!vehicle) {
     return NextResponse.json([], { status: 200 });

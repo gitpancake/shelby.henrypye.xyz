@@ -8,10 +8,71 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
+// Shared team infrastructure tables
+model SharedUser {
+  id          String   @id @default(uuid()) @db.Uuid
+  firebaseUid String   @unique @map("firebase_uid")
+  email       String
+  displayName String?  @map("display_name")
+  photoUrl    String?  @map("photo_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  createdTeams SharedTeam[]
+  memberships  SharedTeamMember[]
+  sentInvites  SharedTeamInvite[]
+
+  @@map("shared_users")
+}
+
+model SharedTeam {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  createdBy String   @map("created_by") @db.Uuid
+  creator   SharedUser @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members SharedTeamMember[]
+  invites SharedTeamInvite[]
+
+  @@map("shared_teams")
+}
+
+model SharedTeamMember {
+  id       String   @id @default(uuid()) @db.Uuid
+  teamId   String   @map("team_id") @db.Uuid
+  team     SharedTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   String   @map("user_id") @db.Uuid
+  user     SharedUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  @@unique([teamId, userId])
+  @@map("shared_team_members")
+}
+
+model SharedTeamInvite {
+  id         String    @id @default(uuid()) @db.Uuid
+  teamId     String    @map("team_id") @db.Uuid
+  team       SharedTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy  String    @map("invited_by") @db.Uuid
+  inviter    SharedUser @relation(fields: [invitedBy], references: [id])
+  email      String
+  role       String
+  token      String    @unique
+  acceptedAt DateTime? @map("accepted_at")
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@unique([teamId, email])
+  @@map("shared_team_invites")
+}
+
 // Existing tables in shared DB — DO NOT MODIFY, just here so Prisma doesn't drop them
 model jobs {
   id                  String    @id
   user_id             String?
+  team_id             String?   @db.Uuid
   title               String
   company             String
   description         String?
@@ -40,6 +101,7 @@ model jobs {
 model trip_projects {
   id             String   @id
   user_id        String
+  team_id        String
   title          String
   start_date     DateTime @db.Date
   end_date       DateTime @db.Date
@@ -56,6 +118,7 @@ model trip_projects {
 model user_cv {
   id        String   @id
   user_id   String?
+  team_id   String?  @db.Uuid
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime
@@ -72,6 +135,7 @@ enum JobStatus {
 model ShelbyVehicle {
   id              String                @id @default(cuid())
   userId          String                @map("user_id")
+  teamId          String                @map("team_id") @db.Uuid
   vin             String                @unique
   licensePlate    String
   mileage         Int

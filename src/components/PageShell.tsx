@@ -158,6 +158,9 @@ export function PageShell({ children }: { children: React.ReactNode }) {
                         email: d.email,
                         displayName: d.displayName,
                         photoURL: d.photoURL,
+                        sharedUserId: d.sharedUserId,
+                        activeTeamId: d.activeTeamId,
+                        teamRole: d.teamRole,
                     });
                 }
             })

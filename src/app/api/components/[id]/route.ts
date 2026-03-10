@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 export const DELETE = withAuth(async (_request, { session, params }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     const { id } = params;
 
     // Verify the component belongs to user's vehicle
     const component = await prisma.shelbyComponent.findFirst({
         where: {
             id,
-            vehicle: { is: { userId: session.uid } },
+            vehicle: { is: { teamId: session.activeTeamId } },
         },
     });
 
@@ -32,6 +35,9 @@ export const DELETE = withAuth(async (_request, { session, params }) => {
 });
 
 export const PATCH = withAuth(async (request, { session, params }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     const { id } = params;
     const body = await request.json();
     const { mergeIntoId } = body;
@@ -46,10 +52,10 @@ export const PATCH = withAuth(async (request, { session, params }) => {
     // Verify both components belong to user's vehicle
     const [source, target] = await Promise.all([
         prisma.shelbyComponent.findFirst({
-            where: { id, vehicle: { is: { userId: session.uid } } },
+            where: { id, vehicle: { is: { teamId: session.activeTeamId } } },
         }),
         prisma.shelbyComponent.findFirst({
-            where: { id: mergeIntoId, vehicle: { is: { userId: session.uid } } },
+            where: { id: mergeIntoId, vehicle: { is: { teamId: session.activeTeamId } } },
         }),
     ]);
 

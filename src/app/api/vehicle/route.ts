@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decodeVin } from "@/lib/nhtsa";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 export const GET = withAuth(async (request, { session }) => {
   const vehicle = await prisma.shelbyVehicle.findFirst({
-    where: { userId: session.uid },
+    where: { teamId: session.activeTeamId },
   });
   if (!vehicle) {
     return NextResponse.json(null, { status: 404 });
@@ -14,8 +14,11 @@ export const GET = withAuth(async (request, { session }) => {
 });
 
 export const POST = withAuth(async (request, { session }) => {
+  const forbidden = assertCanWrite(session);
+  if (forbidden) return forbidden;
+
   const existing = await prisma.shelbyVehicle.findFirst({
-    where: { userId: session.uid },
+    where: { teamId: session.activeTeamId },
   });
   if (existing) {
     return NextResponse.json(
@@ -46,6 +49,7 @@ export const POST = withAuth(async (request, { session }) => {
   const vehicle = await prisma.shelbyVehicle.create({
     data: {
       userId: session.uid,
+      teamId: session.activeTeamId,
       vin: vin.toUpperCase(),
       licensePlate,
       mileage: parseInt(mileage, 10),

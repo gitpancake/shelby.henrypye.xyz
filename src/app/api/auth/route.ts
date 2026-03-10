@@ -36,6 +36,9 @@ export async function GET() {
     email: session.email,
     displayName: session.displayName,
     photoURL: session.photoURL,
+    sharedUserId: session.sharedUserId,
+    activeTeamId: session.activeTeamId,
+    teamRole: session.teamRole,
   });
 }
 

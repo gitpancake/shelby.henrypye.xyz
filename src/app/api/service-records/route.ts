@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { estimateDateFromMileage } from "@/lib/estimate-date";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 export const GET = withAuth(async (request, { session }) => {
     const vehicle = await prisma.shelbyVehicle.findFirst({
-        where: { userId: session.uid },
+        where: { teamId: session.activeTeamId },
     });
     if (!vehicle) {
         return NextResponse.json([], { status: 200 });
@@ -28,9 +28,12 @@ export const GET = withAuth(async (request, { session }) => {
 });
 
 export const POST = withAuth(async (request, { session }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     try {
         const vehicle = await prisma.shelbyVehicle.findFirst({
-            where: { userId: session.uid },
+            where: { teamId: session.activeTeamId },
         });
         if (!vehicle) {
             return NextResponse.json(

@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { estimateDateFromMileage } from "@/lib/estimate-date";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 export const PATCH = withAuth(async (request, { session, params }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     const { id } = params;
     const body = await request.json();
 
@@ -11,7 +14,7 @@ export const PATCH = withAuth(async (request, { session, params }) => {
     const record = await prisma.shelbyServiceRecord.findFirst({
         where: {
             id,
-            vehicle: { is: { userId: session.uid } },
+            vehicle: { is: { teamId: session.activeTeamId } },
         },
     });
 
@@ -71,13 +74,16 @@ export const PATCH = withAuth(async (request, { session, params }) => {
 });
 
 export const DELETE = withAuth(async (_request, { session, params }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     const { id } = params;
 
-    // Verify the record belongs to user's vehicle
+    // Verify the record belongs to team's vehicle
     const record = await prisma.shelbyServiceRecord.findFirst({
         where: {
             id,
-            vehicle: { is: { userId: session.uid } },
+            vehicle: { is: { teamId: session.activeTeamId } },
         },
     });
 

@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runDiagnostic } from "@/lib/anthropic";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
 
 export const POST = withAuth(async (_request, { session }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     try {
         const vehicle = await prisma.shelbyVehicle.findFirst({
-            where: { userId: session.uid },
+            where: { teamId: session.activeTeamId },
         });
         if (!vehicle) {
             return NextResponse.json(

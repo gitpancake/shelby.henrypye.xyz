@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUploadBuffer } from "@/lib/files";
 import { extractServiceRecords } from "@/lib/anthropic";
-import { withAuth } from "@/lib/auth";
+import { withAuth, assertCanWrite } from "@/lib/auth";
 
 export const POST = withAuth(async (_request, { session, params }) => {
+    const forbidden = assertCanWrite(session);
+    if (forbidden) return forbidden;
+
     const { id } = params;
 
     const doc = await prisma.shelbyDocument.findFirst({
         where: {
             id,
-            vehicle: { is: { userId: session.uid } },
+            vehicle: { is: { teamId: session.activeTeamId } },
         },
     });
     if (!doc) {
