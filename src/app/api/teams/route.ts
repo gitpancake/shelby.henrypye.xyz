@@ -18,9 +18,20 @@ export const GET = withAuth(async (_request, { session }) => {
         orderBy: { joinedAt: "asc" },
     });
 
+    const teamIds = memberships.map((m) => m.teamId);
+    const vehicles = await prisma.shelbyVehicle.findMany({
+        where: { teamId: { in: teamIds } },
+        select: { teamId: true, year: true, make: true, model: true },
+    });
+    const vehicleByTeam = new Map(
+        vehicles.map((v) => [v.teamId, `${v.year} ${v.make} ${v.model}`]),
+    );
+
     const teams = memberships.map((m) => ({
         id: m.team.id,
         name: m.team.name,
+        vehicleName: vehicleByTeam.get(m.team.id) ?? null,
+        safeMode: m.team.safeMode,
         role: m.role,
         memberCount: m.team._count.members,
         isActive: m.teamId === session.activeTeamId,

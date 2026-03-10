@@ -2,6 +2,39 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAuth } from "@/lib/auth";
 
+export const PATCH = withAuth(
+    async (request, { session, params }) => {
+        const { id } = params;
+
+        const membership = await prisma.sharedTeamMember.findUnique({
+            where: {
+                teamId_userId: { teamId: id, userId: session.sharedUserId },
+            },
+        });
+
+        if (!membership || membership.role !== "owner") {
+            return NextResponse.json(
+                { error: "Only the team owner can update settings" },
+                { status: 403 },
+            );
+        }
+
+        const body = await request.json();
+        const update: Record<string, unknown> = {};
+
+        if (typeof body.safeMode === "boolean") {
+            update.safeMode = body.safeMode;
+        }
+
+        const team = await prisma.sharedTeam.update({
+            where: { id },
+            data: update,
+        });
+
+        return NextResponse.json(team);
+    },
+);
+
 export const DELETE = withAuth(
     async (_request, { session, params }) => {
         const { id } = params;
@@ -17,6 +50,19 @@ export const DELETE = withAuth(
             return NextResponse.json(
                 { error: "Only the team owner can delete a team" },
                 { status: 403 },
+            );
+        }
+
+        // Check safe mode
+        const team = await prisma.sharedTeam.findUnique({
+            where: { id },
+            select: { safeMode: true },
+        });
+
+        if (team?.safeMode) {
+            return NextResponse.json(
+                { error: "Safe mode is enabled — disable it before deleting" },
+                { status: 400 },
             );
         }
 

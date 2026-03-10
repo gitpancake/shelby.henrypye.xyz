@@ -17,6 +17,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -34,6 +36,7 @@ import {
   Trash2,
   UserPlus,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -97,6 +100,8 @@ const ROLE_LABEL: Record<string, string> = {
 interface TeamInfo {
   id: string;
   name: string;
+  vehicleName: string | null;
+  safeMode: boolean;
   role: string;
   memberCount: number;
 }
@@ -331,7 +336,11 @@ function TeamTab() {
   const [newTeamName, setNewTeamName] = useState("");
   const [creatingTeam, setCreatingTeam] = useState(false);
 
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const isOwner = user.teamRole === "owner";
+  const activeTeam = teams.find((t) => t.id === user.activeTeamId);
 
   const fetchTeamData = useCallback(async () => {
     try {
@@ -403,15 +412,17 @@ function TeamTab() {
     }
   };
 
-  const handleDeleteTeam = async (teamId: string, teamName: string) => {
-    if (!confirm(`Delete "${teamName}"? All vehicle data, documents, and service records for this team will be permanently deleted.`)) return;
+  const handleDeleteTeam = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/teams/${teamId}`, { method: "DELETE" });
+      const res = await fetch(`/api/teams/${deleteTarget.id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to delete team");
       }
-      if (teamId === user.activeTeamId) {
+      setDeleteTarget(null);
+      if (deleteTarget.id === user.activeTeamId) {
         await refreshUser();
         window.location.reload();
       } else {
@@ -420,6 +431,24 @@ function TeamTab() {
       toast.success("Team deleted");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to delete team");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleToggleSafeMode = async () => {
+    if (!activeTeam) return;
+    try {
+      const res = await fetch(`/api/teams/${user.activeTeamId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ safeMode: !activeTeam.safeMode }),
+      });
+      if (!res.ok) throw new Error();
+      await fetchTeamData();
+      toast.success(activeTeam.safeMode ? "Safe mode disabled" : "Safe mode enabled");
+    } catch {
+      toast.error("Failed to update setting");
     }
   };
 
@@ -507,15 +536,15 @@ function TeamTab() {
                       : "hover:bg-muted"
                   }`}
                 >
-                  <span className="truncate">{team.name}</span>
+                  <span className="truncate">{team.vehicleName ?? "Empty"}</span>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     {ROLE_ICON[team.role]}
                     {ROLE_LABEL[team.role]}
                   </span>
                 </button>
-                {team.role === "owner" && teams.length > 1 && (
+                {team.role === "owner" && teams.length > 1 && !team.safeMode && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team.id, team.name); }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: team.id, name: team.vehicleName ?? team.name }); }}
                     className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                     title="Delete team"
                   >
@@ -678,6 +707,56 @@ function TeamTab() {
           </Button>
         )
       )}
+
+      {/* Safe Mode */}
+      {isOwner && activeTeam && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2">Settings</p>
+          <button
+            onClick={handleToggleSafeMode}
+            className={`w-full flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted ${
+              activeTeam.safeMode ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <ShieldCheck className="size-4" />
+              Safe Mode
+            </span>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${
+              activeTeam.safeMode
+                ? "bg-primary/10 text-primary"
+                : "bg-muted text-muted-foreground"
+            }`}>
+              {activeTeam.safeMode ? "On" : "Off"}
+            </span>
+          </button>
+          <p className="text-[11px] text-muted-foreground px-3 mt-1">
+            Prevents team deletion while enabled
+          </p>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Team</DialogTitle>
+            <DialogDescription>
+              This will permanently delete <span className="font-medium text-foreground">{deleteTarget?.name}</span> and
+              all associated vehicle data, documents, and service records.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleDeleteTeam} disabled={deleting}>
+              {deleting ? <Loader2 className="size-4 animate-spin mr-1" /> : <Trash2 className="size-4 mr-1" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

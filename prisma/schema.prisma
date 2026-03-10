@@ -28,6 +28,7 @@ model SharedUser {
 model SharedTeam {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
+  safeMode  Boolean  @default(false) @map("safe_mode")
   createdBy String   @map("created_by") @db.Uuid
   creator   SharedUser @relation(fields: [createdBy], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
