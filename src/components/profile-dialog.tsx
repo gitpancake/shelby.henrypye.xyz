@@ -522,7 +522,7 @@ function TeamTab() {
   return (
     <div className="space-y-5">
       {/* Team Switcher */}
-      {teams.length > 1 && (
+      {teams.length > 0 && (
         <div>
           <p className="text-xs font-medium text-muted-foreground mb-2">Teams</p>
           <div className="space-y-1">
