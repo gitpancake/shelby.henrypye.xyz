@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUploadBuffer } from "@/lib/files";
 import { extractServiceRecords } from "@/lib/anthropic";
+import { withAuth } from "@/lib/auth";
 
-export async function POST(
-    _request: NextRequest,
-    { params }: { params: Promise<{ id: string }> },
-) {
-    const { id } = await params;
+export const POST = withAuth(async (_request, { session, params }) => {
+    const { id } = params;
 
-    const doc = await prisma.shelbyDocument.findUnique({ where: { id } });
+    const doc = await prisma.shelbyDocument.findFirst({
+        where: {
+            id,
+            vehicle: { is: { userId: session.uid } },
+        },
+    });
     if (!doc) {
         return NextResponse.json(
             { error: "Document not found" },
@@ -234,4 +237,4 @@ export async function POST(
             { status: 500 },
         );
     }
-}
+});

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { withAuth } from "@/lib/auth";
 
-export async function GET() {
-  const vehicle = await prisma.shelbyVehicle.findFirst();
+export const GET = withAuth(async (_request, { session }) => {
+  const vehicle = await prisma.shelbyVehicle.findFirst({
+    where: { userId: session.uid },
+  });
   if (!vehicle) {
     return NextResponse.json([], { status: 200 });
   }
@@ -35,4 +38,4 @@ export async function GET() {
   });
 
   return NextResponse.json(result);
-}
+});

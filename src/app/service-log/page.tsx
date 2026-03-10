@@ -6,6 +6,7 @@ import { AddServiceForm } from "./AddServiceForm";
 import { CurrencyToggle } from "./CurrencyToggle";
 import { GuessDateButton } from "./GuessDateButton";
 import { DeleteRecordButton } from "./DeleteRecordButton";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,12 @@ const NOTE_STYLES = {
 } as const;
 
 export default async function ServiceLogPage() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+    const session = await getSession();
+    if (!session) redirect("/login");
+
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) redirect("/setup");
 
     const records = await prisma.shelbyServiceRecord.findMany({

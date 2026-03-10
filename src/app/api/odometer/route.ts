@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { withAuth } from "@/lib/auth";
 
-export async function GET() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+export const GET = withAuth(async (_request, { session }) => {
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) {
         return NextResponse.json([], { status: 200 });
     }
@@ -54,10 +57,12 @@ export async function GET() {
     );
 
     return NextResponse.json(unique);
-}
+});
 
-export async function POST(request: NextRequest) {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+export const POST = withAuth(async (request, { session }) => {
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) {
         return NextResponse.json(
             { error: "No vehicle configured" },
@@ -93,4 +98,4 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(reading, { status: 201 });
-}
+});

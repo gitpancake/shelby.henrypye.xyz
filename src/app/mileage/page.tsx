@@ -4,11 +4,17 @@ import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
 import { OdometerTimeline } from "./OdometerTimeline";
 import { AddReadingForm } from "./AddReadingForm";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function MileagePage() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+    const session = await getSession();
+    if (!session) redirect("/login");
+
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) redirect("/setup");
 
     // Get standalone odometer readings

@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { estimateDateFromMileage } from "@/lib/estimate-date";
+import { withAuth } from "@/lib/auth";
 
-export async function GET() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+export const GET = withAuth(async (request, { session }) => {
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) {
         return NextResponse.json([], { status: 200 });
     }
@@ -22,11 +25,13 @@ export async function GET() {
     });
 
     return NextResponse.json(records);
-}
+});
 
-export async function POST(request: Request) {
+export const POST = withAuth(async (request, { session }) => {
     try {
-        const vehicle = await prisma.shelbyVehicle.findFirst();
+        const vehicle = await prisma.shelbyVehicle.findFirst({
+            where: { userId: session.uid },
+        });
         if (!vehicle) {
             return NextResponse.json(
                 { error: "No vehicle found" },
@@ -125,4 +130,4 @@ export async function POST(request: Request) {
             { status: 500 },
         );
     }
-}
+});

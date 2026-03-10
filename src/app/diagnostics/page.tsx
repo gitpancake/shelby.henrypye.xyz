@@ -5,11 +5,17 @@ import { GradientDivider } from "@/components/GradientDivider";
 import { ComponentHealthSection } from "./ComponentHealthSection";
 import { RunDiagnosticButton } from "./RunDiagnosticButton";
 import type { DiagnosticResult } from "@/lib/anthropic";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function DiagnosticsPage() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+    const session = await getSession();
+    if (!session) redirect("/login");
+
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) redirect("/setup");
 
     const [records, components, latestReport] = await Promise.all([

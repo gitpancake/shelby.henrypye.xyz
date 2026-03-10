@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { runDiagnostic } from "@/lib/anthropic";
+import { withAuth } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
 
-export async function POST() {
+export const POST = withAuth(async (_request, { session }) => {
     try {
-        const vehicle = await prisma.shelbyVehicle.findFirst();
+        const vehicle = await prisma.shelbyVehicle.findFirst({
+            where: { userId: session.uid },
+        });
         if (!vehicle) {
             return NextResponse.json(
                 { error: "No vehicle found" },
@@ -171,4 +174,4 @@ export async function POST() {
             { status: 500 },
         );
     }
-}
+});

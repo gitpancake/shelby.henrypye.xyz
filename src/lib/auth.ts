@@ -51,3 +51,19 @@ export async function clearSession() {
   const jar = await cookies();
   jar.delete(SESSION_COOKIE);
 }
+
+export function withAuth(
+  handler: (request: Request, context: { session: SessionUser; params?: any }) => Promise<Response>
+) {
+  return async (request: Request, routeContext?: any): Promise<Response> => {
+    const session = await getSession();
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const params = routeContext?.params ? await routeContext.params : undefined;
+    return handler(request, { session, params });
+  };
+}

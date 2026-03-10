@@ -1,17 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decodeVin } from "@/lib/nhtsa";
+import { withAuth } from "@/lib/auth";
 
-export async function GET() {
-  const vehicle = await prisma.shelbyVehicle.findFirst();
+export const GET = withAuth(async (request, { session }) => {
+  const vehicle = await prisma.shelbyVehicle.findFirst({
+    where: { userId: session.uid },
+  });
   if (!vehicle) {
     return NextResponse.json(null, { status: 404 });
   }
   return NextResponse.json(vehicle);
-}
+});
 
-export async function POST(request: NextRequest) {
-  const existing = await prisma.shelbyVehicle.findFirst();
+export const POST = withAuth(async (request, { session }) => {
+  const existing = await prisma.shelbyVehicle.findFirst({
+    where: { userId: session.uid },
+  });
   if (existing) {
     return NextResponse.json(
       { error: "Vehicle already exists" },
@@ -40,6 +45,7 @@ export async function POST(request: NextRequest) {
 
   const vehicle = await prisma.shelbyVehicle.create({
     data: {
+      userId: session.uid,
       vin: vin.toUpperCase(),
       licensePlate,
       mileage: parseInt(mileage, 10),
@@ -48,4 +54,4 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json(vehicle, { status: 201 });
-}
+});

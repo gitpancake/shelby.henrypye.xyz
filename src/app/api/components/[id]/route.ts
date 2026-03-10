@@ -1,36 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { withAuth } from "@/lib/auth";
 
-export async function DELETE(
-    _request: NextRequest,
-    { params }: { params: Promise<{ id: string }> },
-) {
-    const { id } = await params;
+export const DELETE = withAuth(async (_request, { session, params }) => {
+    const { id } = params;
 
-    try {
-        // Delete line items first, then the component
-        await prisma.shelbyServiceLineItem.deleteMany({
-            where: { componentId: id },
-        });
+    // Verify the component belongs to user's vehicle
+    const component = await prisma.shelbyComponent.findFirst({
+        where: {
+            id,
+            vehicle: { is: { userId: session.uid } },
+        },
+    });
 
-        await prisma.shelbyComponent.delete({
-            where: { id },
-        });
-
-        return NextResponse.json({ ok: true });
-    } catch {
+    if (!component) {
         return NextResponse.json(
             { error: "Component not found" },
             { status: 404 },
         );
     }
-}
 
-export async function PATCH(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> },
-) {
-    const { id } = await params;
+    await prisma.shelbyServiceLineItem.deleteMany({
+        where: { componentId: id },
+    });
+
+    await prisma.shelbyComponent.delete({
+        where: { id },
+    });
+
+    return NextResponse.json({ ok: true });
+});
+
+export const PATCH = withAuth(async (request, { session, params }) => {
+    const { id } = params;
     const body = await request.json();
     const { mergeIntoId } = body;
 
@@ -41,23 +43,33 @@ export async function PATCH(
         );
     }
 
-    try {
-        // Move all line items from this component to the target
-        await prisma.shelbyServiceLineItem.updateMany({
-            where: { componentId: id },
-            data: { componentId: mergeIntoId },
-        });
+    // Verify both components belong to user's vehicle
+    const [source, target] = await Promise.all([
+        prisma.shelbyComponent.findFirst({
+            where: { id, vehicle: { is: { userId: session.uid } } },
+        }),
+        prisma.shelbyComponent.findFirst({
+            where: { id: mergeIntoId, vehicle: { is: { userId: session.uid } } },
+        }),
+    ]);
 
-        // Delete the now-empty component
-        await prisma.shelbyComponent.delete({
-            where: { id },
-        });
-
-        return NextResponse.json({ ok: true });
-    } catch {
+    if (!source || !target) {
         return NextResponse.json(
-            { error: "Merge failed" },
-            { status: 500 },
+            { error: "Component not found" },
+            { status: 404 },
         );
     }
-}
+
+    // Move all line items from this component to the target
+    await prisma.shelbyServiceLineItem.updateMany({
+        where: { componentId: id },
+        data: { componentId: mergeIntoId },
+    });
+
+    // Delete the now-empty component
+    await prisma.shelbyComponent.delete({
+        where: { id },
+    });
+
+    return NextResponse.json({ ok: true });
+});

@@ -11,6 +11,7 @@ datasource db {
 // Existing tables in shared DB — DO NOT MODIFY, just here so Prisma doesn't drop them
 model jobs {
   id                  String    @id
+  user_id             String?
   title               String
   company             String
   description         String?
@@ -38,6 +39,7 @@ model jobs {
 
 model trip_projects {
   id             String   @id
+  user_id        String
   title          String
   start_date     DateTime @db.Date
   end_date       DateTime @db.Date
@@ -53,6 +55,7 @@ model trip_projects {
 
 model user_cv {
   id        String   @id
+  user_id   String?
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime
@@ -68,6 +71,7 @@ enum JobStatus {
 // Shelby app tables
 model ShelbyVehicle {
   id              String                @id @default(cuid())
+  userId          String                @map("user_id")
   vin             String                @unique
   licensePlate    String
   mileage         Int

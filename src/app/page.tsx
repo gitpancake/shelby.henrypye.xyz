@@ -3,11 +3,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
 import { GradientDivider } from "@/components/GradientDivider";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+    const session = await getSession();
+    if (!session) redirect("/login");
+
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
 
     if (!vehicle) redirect("/setup");
 

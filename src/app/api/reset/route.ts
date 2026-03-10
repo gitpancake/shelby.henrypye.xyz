@@ -1,25 +1,58 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
+import { withAuth } from "@/lib/auth";
 
 const BUCKET = "shelby-documents";
 
-export async function POST() {
+export const POST = withAuth(async (_request, { session }) => {
     try {
+        const vehicle = await prisma.shelbyVehicle.findFirst({
+            where: { userId: session.uid },
+        });
+        if (!vehicle) {
+            return NextResponse.json({ ok: true });
+        }
+
         // Delete in order: notes → line items → service records → odometer readings → documents → components
-        await prisma.shelbyNote.deleteMany();
-        await prisma.shelbyServiceLineItem.deleteMany();
-        await prisma.shelbyServiceRecord.deleteMany();
-        await prisma.shelbyOdometerReading.deleteMany();
-        await prisma.shelbyDiagnosticReport.deleteMany();
+        const recordIds = (
+            await prisma.shelbyServiceRecord.findMany({
+                where: { vehicleId: vehicle.id },
+                select: { id: true },
+            })
+        ).map((r) => r.id);
+
+        if (recordIds.length > 0) {
+            await prisma.shelbyNote.deleteMany({
+                where: { serviceRecordId: { in: recordIds } },
+            });
+            await prisma.shelbyServiceLineItem.deleteMany({
+                where: { serviceRecordId: { in: recordIds } },
+            });
+            await prisma.shelbyServiceRecord.deleteMany({
+                where: { vehicleId: vehicle.id },
+            });
+        }
+
+        await prisma.shelbyOdometerReading.deleteMany({
+            where: { vehicleId: vehicle.id },
+        });
+        await prisma.shelbyDiagnosticReport.deleteMany({
+            where: { vehicleId: vehicle.id },
+        });
 
         // Get all document filenames to delete from storage
         const documents = await prisma.shelbyDocument.findMany({
+            where: { vehicleId: vehicle.id },
             select: { storedFilename: true },
         });
 
-        await prisma.shelbyDocument.deleteMany();
-        await prisma.shelbyComponent.deleteMany();
+        await prisma.shelbyDocument.deleteMany({
+            where: { vehicleId: vehicle.id },
+        });
+        await prisma.shelbyComponent.deleteMany({
+            where: { vehicleId: vehicle.id },
+        });
 
         // Delete files from Supabase Storage
         if (documents.length > 0) {
@@ -34,4 +67,4 @@ export async function POST() {
             { status: 500 },
         );
     }
-}
+});

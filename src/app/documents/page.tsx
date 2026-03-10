@@ -5,11 +5,17 @@ import { GradientDivider } from "@/components/GradientDivider";
 import { DocumentUploader } from "./DocumentUploader";
 import { DocumentCard } from "./DocumentCard";
 import { ResetButton } from "./ResetButton";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function DocumentsPage() {
-    const vehicle = await prisma.shelbyVehicle.findFirst();
+    const session = await getSession();
+    if (!session) redirect("/login");
+
+    const vehicle = await prisma.shelbyVehicle.findFirst({
+        where: { userId: session.uid },
+    });
     if (!vehicle) redirect("/setup");
 
     const documents = await prisma.shelbyDocument.findMany({

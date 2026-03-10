@@ -1,13 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { estimateDateFromMileage } from "@/lib/estimate-date";
+import { withAuth } from "@/lib/auth";
 
-export async function PATCH(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> },
-) {
-    const { id } = await params;
+export const PATCH = withAuth(async (request, { session, params }) => {
+    const { id } = params;
     const body = await request.json();
+
+    // Verify the record belongs to user's vehicle
+    const record = await prisma.shelbyServiceRecord.findFirst({
+        where: {
+            id,
+            vehicle: { is: { userId: session.uid } },
+        },
+    });
+
+    if (!record) {
+        return NextResponse.json(
+            { error: "Record not found" },
+            { status: 404 },
+        );
+    }
 
     // Handle currency update
     if (body.currency) {
@@ -18,92 +31,72 @@ export async function PATCH(
             );
         }
 
-        try {
-            const record = await prisma.shelbyServiceRecord.update({
-                where: { id },
-                data: { currency: body.currency },
-            });
-            return NextResponse.json(record);
-        } catch {
-            return NextResponse.json(
-                { error: "Record not found" },
-                { status: 404 },
-            );
-        }
+        const updated = await prisma.shelbyServiceRecord.update({
+            where: { id },
+            data: { currency: body.currency },
+        });
+        return NextResponse.json(updated);
     }
 
     // Handle guess date
     if (body.guessDate) {
-        try {
-            const record = await prisma.shelbyServiceRecord.findUnique({
-                where: { id },
-            });
-
-            if (!record) {
-                return NextResponse.json(
-                    { error: "Record not found" },
-                    { status: 404 },
-                );
-            }
-
-            if (!record.mileage) {
-                return NextResponse.json(
-                    { error: "Record has no mileage to estimate from" },
-                    { status: 400 },
-                );
-            }
-
-            const estimated = await estimateDateFromMileage(
-                record.vehicleId,
-                record.mileage,
-            );
-
-            if (!estimated) {
-                return NextResponse.json(
-                    { error: "Not enough odometer data to estimate date" },
-                    { status: 400 },
-                );
-            }
-
-            const updated = await prisma.shelbyServiceRecord.update({
-                where: { id },
-                data: { serviceDate: estimated },
-            });
-
-            return NextResponse.json(updated);
-        } catch {
+        if (!record.mileage) {
             return NextResponse.json(
-                { error: "Failed to estimate date" },
-                { status: 500 },
+                { error: "Record has no mileage to estimate from" },
+                { status: 400 },
             );
         }
+
+        const estimated = await estimateDateFromMileage(
+            record.vehicleId,
+            record.mileage,
+        );
+
+        if (!estimated) {
+            return NextResponse.json(
+                { error: "Not enough odometer data to estimate date" },
+                { status: 400 },
+            );
+        }
+
+        const updated = await prisma.shelbyServiceRecord.update({
+            where: { id },
+            data: { serviceDate: estimated },
+        });
+
+        return NextResponse.json(updated);
     }
 
     return NextResponse.json({ error: "No valid action" }, { status: 400 });
-}
+});
 
-export async function DELETE(
-    _request: NextRequest,
-    { params }: { params: Promise<{ id: string }> },
-) {
-    const { id } = await params;
+export const DELETE = withAuth(async (_request, { session, params }) => {
+    const { id } = params;
 
-    try {
-        await prisma.shelbyNote.deleteMany({
-            where: { serviceRecordId: id },
-        });
-        await prisma.shelbyServiceLineItem.deleteMany({
-            where: { serviceRecordId: id },
-        });
-        await prisma.shelbyServiceRecord.delete({
-            where: { id },
-        });
+    // Verify the record belongs to user's vehicle
+    const record = await prisma.shelbyServiceRecord.findFirst({
+        where: {
+            id,
+            vehicle: { is: { userId: session.uid } },
+        },
+    });
 
-        return NextResponse.json({ ok: true });
-    } catch {
+    if (!record) {
         return NextResponse.json(
             { error: "Record not found" },
             { status: 404 },
         );
     }
-}
+
+    await prisma.shelbyNote.deleteMany({
+        where: { serviceRecordId: id },
+    });
+    await prisma.shelbyServiceLineItem.deleteMany({
+        where: { serviceRecordId: id },
+    });
+    await prisma.shelbyServiceRecord.delete({
+        where: { id },
+    });
+
+    return NextResponse.json({ ok: true });
+});
