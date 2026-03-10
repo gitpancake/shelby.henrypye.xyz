@@ -403,6 +403,26 @@ function TeamTab() {
     }
   };
 
+  const handleDeleteTeam = async (teamId: string, teamName: string) => {
+    if (!confirm(`Delete "${teamName}"? All vehicle data, documents, and service records for this team will be permanently deleted.`)) return;
+    try {
+      const res = await fetch(`/api/teams/${teamId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to delete team");
+      }
+      if (teamId === user.activeTeamId) {
+        await refreshUser();
+        window.location.reload();
+      } else {
+        await fetchTeamData();
+      }
+      toast.success("Team deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete team");
+    }
+  };
+
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
     setSendingInvite(true);
@@ -478,21 +498,31 @@ function TeamTab() {
           <p className="text-xs font-medium text-muted-foreground mb-2">Teams</p>
           <div className="space-y-1">
             {teams.map((team) => (
-              <button
-                key={team.id}
-                onClick={() => handleSwitchTeam(team.id)}
-                className={`w-full flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors ${
-                  team.id === user.activeTeamId
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "hover:bg-muted"
-                }`}
-              >
-                <span className="truncate">{team.name}</span>
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  {ROLE_ICON[team.role]}
-                  {ROLE_LABEL[team.role]}
-                </span>
-              </button>
+              <div key={team.id} className="flex items-center gap-1">
+                <button
+                  onClick={() => handleSwitchTeam(team.id)}
+                  className={`flex-1 flex items-center justify-between rounded-md px-3 py-2 text-sm transition-colors ${
+                    team.id === user.activeTeamId
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "hover:bg-muted"
+                  }`}
+                >
+                  <span className="truncate">{team.name}</span>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    {ROLE_ICON[team.role]}
+                    {ROLE_LABEL[team.role]}
+                  </span>
+                </button>
+                {team.role === "owner" && teams.length > 1 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteTeam(team.id, team.name); }}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    title="Delete team"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>
